@@ -1,156 +1,230 @@
-import express from 'express';
-import http from 'http';
-import { Server as SocketIO } from 'socket.io';
-import fs from 'fs/promises';
-import path from 'path';
-import dotenv from 'dotenv';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel – CoinVote</title>
+  <style>
+    :root {
+      --bg: #1f2125;
+      --card-bg: #2a2d31;
+      --text: #e0e0e0;
+      --text-light: #777;
+      --accent: #4fa3ff;
+      --accent-dark: #3a88d0;
+      --danger: #e74c3c;
+      --border: #3a3d41;
+      --hover: #323539;
+      --radius: 8px;
+      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+    body { background: var(--bg); color: var(--text); }
+    nav {
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem; display: flex; align-items: center;
+    }
+    .logo { font-size: 1.75rem; color: var(--accent); font-weight:700; }
+    .nav-links { margin-left: auto; }
+    .nav-links a {
+      margin-left:1rem; padding:0.5rem 1rem; background:var(--accent);
+      color:#fff; border:none; border-radius:var(--radius);
+      text-decoration:none; transition:background 0.2s;
+    }
+    .nav-links a:hover { background: var(--accent-dark); }
+    main { max-width:1000px; margin:2rem auto; padding:0 1rem; }
+    .card {
+      background: var(--card-bg); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.5);
+      margin-bottom:2rem; overflow:hidden;
+    }
+    section { padding:1.5rem; border-bottom:1px solid var(--border); }
+    section:last-child { border-bottom:none; }
+    h2 { margin-bottom:1rem; color:var(--accent); text-align:center; }
+    ul { list-style:none; padding:0; }
+    li {
+      display:flex; align-items:flex-start; gap:1rem;
+      padding:1rem 0; border-bottom:1px solid var(--border);
+    }
+    li:last-child { border-bottom:none; }
+    .logo-img {
+      width:60px; height:60px; border-radius:var(--radius);
+      border:1px solid var(--border); object-fit:cover;
+    }
+    .details {
+      display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;
+      color:var(--text-light); font-size:0.9rem; flex:1;
+    }
+    .details div strong { color:var(--text); }
+    .actions {
+      display:flex; flex-direction:column; gap:0.5rem;
+    }
+    .actions button {
+      padding:0.5rem; border:none; border-radius:var(--radius);
+      cursor:pointer; color:#fff; font-size:0.9rem;
+    }
+    .approve { background: var(--accent); }
+    .reject, .delete { background: var(--danger); }
+    /* Votes adjuster */
+    .actions input[type="number"] {
+      width:4rem; padding:0.3rem; border-radius:var(--radius);
+      border:1px solid var(--border); background:var(--card-bg);
+      color:var(--text);
+    }
+    .set-votes {
+      background: var(--accent-dark);
+    }
+    .hidden { display:none; }
+    .analytics-section { padding:1.5rem; }
+    .chart-placeholder {
+      background: var(--card-bg); border:1px solid var(--border);
+      border-radius:var(--radius); height:200px; margin-bottom:1rem;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--text-light);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">CoinVote Admin</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/submit.html">Submit</a>
+      <a href="/admin.html">Admin</a>
+    </div>
+  </nav>
 
-dotenv.config(); // Load .env
+  <main>
+    <div class="card" id="loginCard">
+      <section>
+        <h2>Admin Login</h2>
+        <input id="user" type="text" placeholder="Username" style="width:100%;margin-bottom:1rem;">
+        <input id="pass" type="password" placeholder="Password" style="width:100%;margin-bottom:1rem;">
+        <button id="loginBtn" style="width:100%;padding:0.75rem;background:var(--accent);">Log In</button>
+      </section>
+    </div>
 
-const ADMIN_USER = process.env.ADMIN_USER;
-const ADMIN_PASS = process.env.ADMIN_PASS;
+    <div class="card hidden" id="panel">
+      <section>
+        <h2>Pending Submissions</h2>
+        <ul id="pendingList"></ul>
+      </section>
+      <section>
+        <h2>Approved Tokens</h2>
+        <ul id="approvedList"></ul>
+      </section>
+      <section class="analytics-section">
+        <h2>Analytics Data</h2>
+        <div class="chart-placeholder" id="trendData">Trend: Loading...</div>
+        <div class="chart-placeholder" id="topData">Top5: Loading...</div>
+        <div class="chart-placeholder" id="submissionsData">Subs: Loading...</div>
+      </section>
+    </div>
+  </main>
 
-const app = express();
-const server = http.createServer(app);
-const io = new SocketIO(server);
+  <script>
+    (async function(){
+      const API_LOGIN  = '/api/admin/login';
+      const API_POST   = '/api/approved';
+      const KEY = 'coinvote_pending';
+      let pending = JSON.parse(localStorage.getItem(KEY))||[];
+      let approved = [];
 
-app.set('trust proxy', true);
-app.use(express.json({ limit: '50mb' }));
-app.use(express.static(process.cwd()));
+      const loginCard = document.getElementById('loginCard');
+      const panel = document.getElementById('panel');
 
-const DATA_FILE  = path.join(process.cwd(), 'tokens.json');
-const VOTES_FILE = path.join(process.cwd(), 'votes.json');
+      document.getElementById('loginBtn').onclick = async () => {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
+        try {
+          const res = await fetch(API_LOGIN, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({user,pass})
+          });
+          if (!res.ok) throw '';
+          loginCard.classList.add('hidden');
+          panel.classList.remove('hidden');
+          fetchApproved();
+          loadAnalytics();
+        } catch {
+          alert('Invalid credentials');
+        }
+      };
 
-// Utility: read JSON or fallback
-async function readJson(filePath, fallback) {
-  try {
-    const raw = await fs.readFile(filePath, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-// Utility: write JSON
-async function writeJson(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
-}
+      async function fetchApproved(){
+        const res = await fetch('/api/approved');
+        approved = await res.json();
+        render();
+      }
 
-// Admin login
-app.post('/api/admin/login', (req, res) => {
-  const { user, pass } = req.body;
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    return res.json({ success: true });
-  }
-  res.status(401).json({ error: 'Unauthorized' });
-});
+      function savePending(){
+        localStorage.setItem(KEY,JSON.stringify(pending));
+      }
 
-// Socket.io
-io.on('connection', socket => {
-  console.log('Client connected:', socket.id);
-});
+      function render(){
+        // … render pending (unchanged) …
 
-// GET approved + 24h vote counts
-app.get('/api/approved', async (_req, res) => {
-  const tokens = await readJson(DATA_FILE, []);
-  let voteEvents = await readJson(VOTES_FILE, []);
-  if (!Array.isArray(voteEvents)) voteEvents = [];
+        // Render approved with votes adjuster:
+        const ulApp = document.getElementById('approvedList');
+        ulApp.innerHTML = '';
+        if (!approved.length) {
+          ulApp.innerHTML = '<li>No approved tokens</li>';
+        } else {
+          approved.forEach(t => {
+            const li = document.createElement('li');
+            const img = document.createElement('img');
+            img.src = t.logo; img.className = 'logo-img';
 
-  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-  const counts24h = voteEvents
-    .filter(e => e.ts >= cutoff)
-    .reduce((acc, e) => {
-      acc[e.symbol] = (acc[e.symbol] || 0) + 1;
-      return acc;
-    }, {});
+            const det = document.createElement('div');
+            det.className = 'details';
+            det.innerHTML = `
+              <div><strong>Name:</strong> ${t.name}</div>
+              <div><strong>Symbol:</strong> ${t.symbol}</div>
+              <div><strong>Website:</strong> <a href="${t.website}" target="_blank">Visit</a></div>
+              <div><strong>Votes:</strong> ${t.votes}</div>
+            `;
 
-  const out = tokens.map(t => ({
-    ...t,
-    votes: t.votes || 0,
-    votes24h: counts24h[t.symbol] || 0,
-  }));
+            const actions = document.createElement('div');
+            actions.className = 'actions';
 
-  res.json(out);
-});
+            // — Votes adjuster:
+            const inp = document.createElement('input');
+            inp.type = 'number'; inp.min = 0; inp.value = t.votes;
+            const setBtn = document.createElement('button');
+            setBtn.textContent = 'Set Votes';
+            setBtn.className = 'set-votes';
+            setBtn.onclick = async () => {
+              const nv = parseInt(inp.value,10);
+              if (isNaN(nv)||nv<0) return alert('Invalid number');
+              const r = await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/votes`,{
+                method:'PUT',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({votes:nv})
+              });
+              if (!r.ok) return alert('Failed');
+              fetchApproved();
+            };
 
-// POST new token
-app.post('/api/approved', async (req, res) => {
-  const newToken = req.body;
-  if (!newToken || !newToken.name) {
-    return res.status(400).json({ error: 'Invalid payload' });
-  }
-  newToken.createdAt = Date.now();
-  newToken.votes = 0;
+            // — Delete button:
+            const del = document.createElement('button');
+            del.textContent = 'Delete'; del.className='delete';
+            del.onclick = async () => {
+              await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`,{method:'DELETE'});
+              fetchApproved();
+            };
 
-  const tokens = await readJson(DATA_FILE, []);
-  tokens.push(newToken);
-  await writeJson(DATA_FILE, tokens);
+            actions.append(inp,setBtn,del);
+            li.append(img,det,actions);
+            ulApp.appendChild(li);
+          });
+        }
+      }
 
-  res.status(201).json(newToken);
-});
-
-// DELETE token
-app.delete('/api/approved/:symbol', async (req, res) => {
-  const symbol = req.params.symbol;
-  let tokens = await readJson(DATA_FILE, []);
-  const before = tokens.length;
-  tokens = tokens.filter(t => t.symbol !== symbol);
-  if (tokens.length === before) {
-    return res.status(404).json({ error: 'Token not found' });
-  }
-  await writeJson(DATA_FILE, tokens);
-  res.status(204).end();
-});
-
-// PUT vote (rate-limited & record history)
-app.put('/api/approved/:symbol/vote', async (req, res) => {
-  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-  const symbol = req.params.symbol;
-  const now = Date.now();
-  const TTL = 12 * 60 * 60 * 1000; // 12h
-
-  const tokens = await readJson(DATA_FILE, []);
-  let voteEvents = await readJson(VOTES_FILE, []);
-  if (!Array.isArray(voteEvents)) voteEvents = [];
-
-  // Rate limit
-  const lastByIp = voteEvents
-    .filter(e => e.symbol === symbol && e.ip === ip)
-    .sort((a, b) => b.ts - a.ts)[0]?.ts || 0;
-
-  if (now - lastByIp < TTL) {
-    const hoursLeft = Math.ceil((TTL - (now - lastByIp)) / (60 * 60 * 1000));
-    return res.status(429).json({ error: `Rate limit: wait ${hoursLeft}h before voting` });
-  }
-
-  // Append vote event
-  voteEvents.push({ symbol, ip, ts: now });
-  await writeJson(VOTES_FILE, voteEvents);
-
-  // Update token vote count
-  const idx = tokens.findIndex(t => t.symbol === symbol);
-  if (idx === -1) {
-    return res.status(404).json({ error: 'Token not found' });
-  }
-  tokens[idx].votes = (tokens[idx].votes || 0) + 1;
-  await writeJson(DATA_FILE, tokens);
-
-  io.emit('voteUpdate', { symbol, votes: tokens[idx].votes });
-  res.json({ symbol, votes: tokens[idx].votes });
-});
-
-// Ensure votes.json exists as array
-(async () => {
-  let v = await readJson(VOTES_FILE, []);
-  if (!Array.isArray(v)) v = [];
-  await writeJson(VOTES_FILE, v);
-})();
-
-// Catch-all for SPA
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(process.cwd(), 'index.html'));
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
-});
+      async function loadAnalytics(){
+        // … analytics code unchanged …
+      }
+    })();
+  </script>
+</body>
+</html>
