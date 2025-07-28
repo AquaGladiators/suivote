@@ -159,6 +159,11 @@ app.put('/api/approved/:symbol/votes', async (req, res) => {
   res.json({ symbol, votes });
 });
 
+// — DEBUG: serve raw tokens.json —
+app.get('/debug/tokens', (_req, res) => {
+  res.sendFile(DATA_FILE);
+});
+
 // Ensure votes.json exists as array
 (async () => {
   let v = await readJson(VOTES_FILE, []);
