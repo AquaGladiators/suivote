@@ -6,218 +6,143 @@
   <title>Suivote: Today's Rising Cryptocurrencies</title>
   <meta name="description" content="Suivote is a leading cryptocurrency aggregation platform, spotlighting early-stage tokens, NFTs, and meme coins with high potential.">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-
   <style>
     :root {
-      --bg: #1f2125;
-      --card-bg: #2a2d31;
-      --text: #e0e0e0;
-      --text-secondary: #777;
-      --accent: #4fa3ff;
-      --accent-dark: #3a88d0;
-      --border: #3a3d41;
-      --hover: #323539;
-      --radius: 8px;
+      --bg: #1f2125; --card-bg: #2a2d31; --text: #e0e0e0;
+      --text-secondary: #777; --accent: #4fa3ff; --accent-dark: #3a88d0;
+      --border: #3a3d41; --hover: #323539; --radius: 8px;
       --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
+    * { box-sizing: border-box; margin:0; padding:0; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: var(--font);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      touch-action: manipulation;
+      display:flex; flex-direction:column; min-height:100vh;
+      touch-action:manipulation;
     }
     nav {
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: var(--card-bg); border-bottom:1px solid var(--border);
+      padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;
     }
-    .logo { font-size: 1.75rem; color: var(--accent); font-weight: 700; }
-    .nav-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; }
-    .nav-links {
-      display: flex;
-      gap: 1rem;
+    .logo { font-size:1.75rem; color:var(--accent); font-weight:700; }
+    .nav-toggle { display:none; background:none; border:none; color:var(--text); font-size:1.5rem }
+    .nav-links { display:flex; gap:1rem }
+    .nav-links button, .nav-links a {
+      padding:.5rem 1rem; border:none; border-radius:var(--radius);
+      background:var(--accent); color:#fff; text-decoration:none;
+      transition:background .2s; touch-action:manipulation;
     }
-    .nav-links button,
-    .nav-links a {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s;
-      touch-action: manipulation;
-    }
-    .nav-links button { background: #fff; color: var(--accent); font-weight: bold; }
-    .nav-links button:hover,
-    .nav-links a:hover { background: var(--accent-dark); }
+    .nav-links button { background:#fff; color:var(--accent); font-weight:bold }
+    .nav-links button:hover, .nav-links a:hover { background:var(--accent-dark) }
 
-    /* Trending bar */
     .trending-bar {
-      margin: 1rem 2rem;
-      padding: 1rem 1.5rem;
-      background: rgba(30,30,35,0.4);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: var(--radius);
-      overflow: hidden;
+      margin:1rem 2rem; padding:1rem 1.5rem;
+      background:rgba(30,30,35,0.4); backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.1); border-radius:var(--radius);
+      overflow:hidden;
     }
     .trending-label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+      font-size:.85rem; text-transform:uppercase; color:var(--text-secondary);
+      margin-bottom:.5rem;
     }
     .trending-list {
-      display: inline-flex;
-      white-space: nowrap;
-      animation: marquee 16s linear infinite;
+      display:inline-flex; white-space:nowrap;
+      animation:marquee 16s linear infinite;
     }
     .trending-item {
-      display: inline-block;
-      margin: 0 1rem;
-      padding: 0.4rem 0.8rem;
-      background: linear-gradient(135deg, #4fa3ff, #2fd0c9);
-      color: #fff;
-      font-weight: 600;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transform: skewX(-10deg);
-      transition: transform 0.3s;
-      touch-action: manipulation;
+      display:inline-block; margin:0 1rem; padding:.4rem .8rem;
+      background:linear-gradient(135deg,#4fa3ff,#2fd0c9); color:#fff;
+      font-weight:600; border-radius:var(--radius); cursor:pointer;
+      transform:skewX(-10deg); transition:transform .3s;
     }
-    .trending-item:hover { transform: skewX(0deg) scale(1.1); }
-    @keyframes marquee { 0%{transform:translateX(100%);}100%{transform:translateX(-100%);} }
+    .trending-item:hover { transform:skewX(0) scale(1.1) }
+    @keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
 
     main.container {
-      flex: 1;
-      display: flex;
-      gap: 1rem;
-      padding: 2rem;
+      flex:1; display:flex; gap:1rem; padding:2rem;
     }
     .left, .right {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.5);
     }
-    .left { flex: 3; display: flex; flex-direction: column; }
-    .right { flex: 1; max-height: calc(100vh - 128px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .left { flex:3; display:flex; flex-direction:column }
+    .right {
+      flex:1; max-height:calc(100vh-128px);
+      overflow-y:auto; -webkit-overflow-scrolling:touch;
+    }
 
     .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1rem;
     }
     .search {
-      width: 300px;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg);
-      color: var(--text);
+      width:300px; padding:.5rem 1rem;
+      border:1px solid var(--border); border-radius:var(--radius);
+      background:var(--bg); color:var(--text);
     }
 
-    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-wrapper { overflow-x:auto; -webkit-overflow-scrolling:touch; }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
+      width:100%; border-collapse:collapse; min-width:700px;
     }
     thead th {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border);
-      background: var(--card-bg);
-      text-align: left;
+      padding:.75rem 1rem; font-size:.85rem; text-transform:uppercase;
+      color:var(--text-secondary); background:var(--card-bg);
+      border-bottom:1px solid var(--border); text-align:left;
     }
-    tbody tr { transition: background 0.2s; cursor: pointer; }
-    tbody tr:hover { background: var(--hover); }
+    tbody tr { cursor:pointer; transition:background .2s }
+    tbody tr:hover { background:var(--hover) }
     tbody td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
+      padding:1rem; border-bottom:1px solid var(--border);
+      vertical-align:middle;
     }
 
-    .logo-img { width: 40px; height: 40px; border-radius: var(--radius); border: 1px solid var(--border); object-fit: cover; }
+    .logo-img { width:40px; height:40px; border-radius:var(--radius); object-fit:cover }
     .link-btn, .vote-btn {
-      padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.85rem;
-      text-decoration: none;
-      transition: background 0.2s;
-      touch-action: manipulation;
+      padding:.4rem .8rem; border:none; border-radius:var(--radius);
+      background:var(--accent); color:#fff; cursor:pointer;
+      text-decoration:none; transition:background .2s;
     }
-    .link-btn:hover, .vote-btn:hover { background: var(--accent-dark); }
-    .vote-btn.disabled { background: var(--border); cursor: not-allowed; opacity: 0.6; }
+    .link-btn:hover, .vote-btn:hover { background:var(--accent-dark) }
+    .vote-btn.disabled { background:var(--border); cursor:not-allowed; opacity:.6 }
 
-    .new-title { padding: 1.5rem 1rem 0; text-align: center; color: var(--accent); font-size: 1.25rem; }
+    .new-title { padding:1.5rem 1rem 0; text-align:center; color:var(--accent); font-size:1.25rem }
     .new-list {
-      list-style: none;
-      padding: 1rem;
-      display: flex;
-      gap: 1rem;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      list-style:none; padding:1rem; display:flex; gap:1rem;
+      overflow-x:auto; -webkit-overflow-scrolling:touch;
     }
     .new-list li {
-      flex: 0 0 auto;
-      background: var(--card-bg);
-      padding: 0.5rem;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex:0 0 auto; background:var(--card-bg); padding:.5rem;
+      border-radius:var(--radius); border:1px solid var(--border);
+      display:flex; flex-direction:column; align-items:center;
     }
-    .small-logo { width: 30px; height: 30px; border-radius: var(--radius); }
-    .new-name { font-weight: 600; font-size: 0.9rem; margin-top: 0.25rem; }
+    .small-logo { width:30px; height:30px; border-radius:var(--radius); object-fit:cover }
+    .new-name { font-weight:600; font-size:.9rem; margin-top:.25rem }
 
     .modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      visibility: hidden;
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.7); display:flex;
+      justify-content:center; align-items:center; visibility:hidden;
     }
-    .modal.open { visibility: visible; }
+    .modal.open { visibility:visible }
     .modal-content {
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: var(--radius);
-      max-width: 500px;
-      width: 90%;
-      position: relative;
+      background:var(--card-bg); padding:2rem; border-radius:var(--radius);
+      max-width:500px; width:90%; position:relative;
     }
-    .close-btn { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
-    .info-row { margin-bottom: 0.5rem; }
+    .close-btn {
+      position:absolute; top:1rem; right:1rem; background:none;
+      border:none; color:var(--text); font-size:1.5rem; cursor:pointer;
+    }
+    .info-row { margin-bottom:.5rem }
 
-    @media (max-width: 767px) {
-      nav { padding: 1rem; }
-      .nav-toggle { display: block; }
-      .nav-links { display: none; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
-      main.container { flex-direction: column; padding: 1rem; gap: 1rem; }
-      .header { flex-direction: column; gap: 0.5rem; }
-      .search { width: 100%; }
-      .table-wrapper table { min-width: 100%; }
+    @media(max-width:767px){
+      nav { padding:1rem }
+      .nav-toggle { display:block }
+      .nav-links { display:none; flex-direction:column; gap:.5rem; margin-top:.5rem }
+      main.container { flex-direction:column; padding:1rem; gap:1rem }
+      .header { flex-direction:column; gap:.5rem }
+      .search { width:100% }
+      table { min-width:100% }
     }
   </style>
 </head>
@@ -246,7 +171,11 @@
       <div class="table-wrapper">
         <table id="approvedTable">
           <thead>
-            <tr><th>#</th><th>Logo</th><th>Coin</th><th>Website</th><th>Votes</th><th>Action</th></tr>
+            <tr>
+              <th>#</th><th>Logo</th><th>Coin</th>
+              <th>Site</th><th>TG</th><th>X</th><th>Buy</th>
+              <th>Votes</th><th>Action</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -262,24 +191,119 @@
     <div class="modal-content">
       <button id="closeModal" class="close-btn">×</button>
       <div id="modalInfo"></div>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button id="modalTG" class="link-btn">TG</button>
+        <button id="modalX" class="link-btn">X</button>
+      </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    function toggleNav() { const nav=document.getElementById('navLinks'); nav.style.display=nav.style.display==='flex'?'none':'flex'; }
-    const GET_API='/api/approved', VOTE_API=s=>`/api/approved/${encodeURIComponent(s)}/vote`, KEY='coinvote_voted';
+    function toggleNav(){
+      const nav=document.getElementById('navLinks');
+      nav.style.display=nav.style.display==='flex'?'none':'flex';
+    }
+    const GET_API='/api/approved',
+          VOTE_API=s=>`/api/approved/${encodeURIComponent(s)}/vote`,
+          KEY='coinvote_voted';
     let approved=[], voted=JSON.parse(localStorage.getItem(KEY))||[];
+
     const socket=io();
-    socket.on('voteUpdate',({symbol,votes})=>{ const tok=approved.find(t=>t.symbol===symbol); if(tok){ tok.votes=votes; renderTable(); renderTrending(); }});
-    document.addEventListener('DOMContentLoaded',()=>{ loadData(); document.getElementById('search').addEventListener('input',e=>filter(e.target.value)); document.getElementById('closeModal').onclick=()=>document.getElementById('detailModal').classList.remove('open'); });
-    async function loadData(){ const res=await fetch(GET_API); approved=await res.json(); renderTable(); renderNew(); renderTrending(); }
-    function filter(q){ q=q.toLowerCase(); document.querySelectorAll('#approvedTable tbody tr').forEach(tr=>{ tr.style.display=tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q)?'':'none'; }); }
-    function renderTable(){ const list=approved.slice().sort((a,b)=>b.votes-a.votes).slice(0,50), tbody=document.querySelector('#approvedTable tbody'); tbody.innerHTML=''; if(!list.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">No tokens</td></tr>'; return; } list.forEach((t,i)=>{ const has=voted.includes(t.symbol); const tr=document.createElement('tr'); tr.onclick=()=>showDetails(t); tr.innerHTML=`<td>${i+1}</td><td><img src="${t.logo}" class="logo-img" alt="${t.name}"></td><td>${t.name} <small>(${t.symbol})</small></td><td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Site</a>`:'-'}</td><td>${t.votes}</td><td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''} onclick="event.stopPropagation();vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`; tbody.appendChild(tr); }); }
-    function renderNew(){ const list=approved.slice(-10).reverse(), ul=document.getElementById('newList'); ul.innerHTML=''; list.forEach(t=>{ const li=document.createElement('li'); li.innerHTML=`<img src="${t.logo}" class="small-logo"><div class="new-name">${t.name}</div>`; ul.appendChild(li); }); }
-    function renderTrending(){ const list=approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10), cont=document.getElementById('trendingList'); cont.innerHTML=''; list.forEach(t=>{ const span=document.createElement('span'); span.className='trending-item'; span.textContent=`${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`; span.onclick=()=>showDetails(t); cont.appendChild(span); }); }
-    async function vote(sym){ if(voted.includes(sym))return; const res=await fetch(VOTE_API(sym),{method:'PUT'}); if(res.status===429){ const{error}=await res.json(); alert(error); return;} if(!res.ok)return alert('Vote failed'); voted.push(sym); localStorage.setItem(KEY,JSON.stringify(voted)); loadData(); }
-    function showDetails(t){ const modal=document.getElementById('detailModal'); document.getElementById('modalInfo').innerHTML=`<h3>${t.name} (${t.symbol})</h3><p>${t.description||'No description'}</p><p><strong>Chain:</strong> ${t.chain||'-'}</p><p><strong>Contract:</strong> ${t.contract||'-'}</p><p><strong>Telegram:</strong> ${t.telegram?`<a href="${t.telegram}" target="_blank">TG</a>`:'-'}</p><p><strong>Twitter:</strong> ${t.xlink?`<a href="${t.xlink}" target="_blank">X</a>`:'-'}</p>`; modal.classList.add('open'); }
+    socket.on('voteUpdate',({symbol,votes})=>{
+      const tok=approved.find(t=>t.symbol===symbol);
+      if(tok){ tok.votes=votes; renderTable(); renderTrending(); }
+    });
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      loadData();
+      document.getElementById('search').addEventListener('input',e=>filter(e.target.value));
+      document.getElementById('closeModal').onclick=()=>document.getElementById('detailModal').classList.remove('open');
+    });
+
+    async function loadData(){
+      const res=await fetch(GET_API);
+      approved=await res.json();
+      renderTable(); renderNew(); renderTrending();
+    }
+    function filter(q){
+      q=q.toLowerCase();
+      document.querySelectorAll('#approvedTable tbody tr').forEach(tr=>{
+        tr.style.display=tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q)?'':'none';
+      });
+    }
+    function renderTable(){
+      const list=approved.slice().sort((a,b)=>b.votes-a.votes).slice(0,50),
+            tbody=document.querySelector('#approvedTable tbody');
+      tbody.innerHTML='';
+      if(!list.length){
+        tbody.innerHTML='<tr><td colspan="9" style="text-align:center;">No tokens</td></tr>';
+        return;
+      }
+      list.forEach((t,i)=>{
+        const has=voted.includes(t.symbol);
+        const tr=document.createElement('tr'); tr.onclick=()=>showDetails(t);
+        tr.innerHTML=
+          `<td>${i+1}</td>
+           <td><img src="${t.logo}" class="logo-img" alt="${t.name}"></td>
+           <td>${t.name} <small>(${t.symbol})</small></td>
+           <td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Site</a>`:'-'}</td>
+           <td>${t.telegram?`<a href="${t.telegram}" class="link-btn" target="_blank">TG</a>`:'-'}</td>
+           <td>${t.xlink?`<a href="${t.xlink}" class="link-btn" target="_blank">X</a>`:'-'}</td>
+           <td>${t.buyLink?`<a href="${t.buyLink}" class="link-btn" target="_blank">Buy</a>`:'-'}</td>
+           <td>${t.votes}</td>
+           <td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''}
+                onclick="event.stopPropagation();vote('${t.symbol}')">
+             ${has?'Voted':'Vote'}
+           </button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    function renderNew(){
+      const list=approved.slice(-10).reverse(), ul=document.getElementById('newList');
+      ul.innerHTML='';
+      list.forEach(t=>{
+        const li=document.createElement('li');
+        li.innerHTML=`<img src="${t.logo}" class="small-logo"><div class="new-name">${t.name}</div>`;
+        ul.appendChild(li);
+      });
+    }
+    function renderTrending(){
+      const list=approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10),
+            cont=document.getElementById('trendingList');
+      cont.innerHTML='';
+      list.forEach(t=>{
+        const span=document.createElement('span');
+        span.className='trending-item';
+        span.textContent=`${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
+        span.onclick=()=>showDetails(t);
+        cont.appendChild(span);
+      });
+    }
+    async function vote(sym){
+      if(voted.includes(sym))return;
+      const res=await fetch(VOTE_API(sym),{method:'PUT'});
+      if(res.status===429){const{error}=await res.json();alert(error);return;}
+      if(!res.ok)return alert('Vote failed');
+      voted.push(sym);
+      localStorage.setItem(KEY,JSON.stringify(voted));
+      loadData();
+    }
+    function showDetails(t){
+      const modal=document.getElementById('detailModal');
+      document.getElementById('modalInfo').innerHTML=
+        `<h3>${t.name} (${t.symbol})</h3>
+         <p>${t.description||'No description'}</p>
+         <p><strong>Chain:</strong> ${t.chain||'-'}</p>
+         <p><strong>Contract:</strong> ${t.contract||'-'}</p>`;
+      const btnTG=document.getElementById('modalTG'),
+            btnX=document.getElementById('modalX');
+      if(t.telegram){ btnTG.disabled=false; btnTG.onclick=()=>window.open(t.telegram,'_blank'); }
+      else { btnTG.disabled=true; }
+      if(t.xlink){ btnX.disabled=false; btnX.onclick=()=>window.open(t.xlink,'_blank'); }
+      else { btnX.disabled=true; }
+      modal.classList.add('open');
+    }
   </script>
 </body>
 </html>
