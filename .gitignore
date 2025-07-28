@@ -1,2 +1,5 @@
-ADMIN_USER=admin
-ADMIN_PASS=pusikurac
+node_modules/
+.env
+logs
+*.log
+.DS_Store
