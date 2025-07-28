@@ -138,8 +138,6 @@
     .hidden {
       display: none;
     }
-
-    /* Analytics placeholders */
     .analytics-section {
       padding: 1.5rem;
     }
@@ -161,9 +159,9 @@
   <nav>
     <div class="logo">CoinVote Admin</div>
     <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="submit.html">Submit</a>
-      <a href="admin.html" id="adminBtn">Admin</a>
+      <a href="/">Home</a>
+      <a href="/submit.html">Submit</a>
+      <a href="/admin.html" id="adminBtn">Admin</a>
     </div>
   </nav>
   <main>
@@ -206,28 +204,34 @@
 
   <script>
     (function(){
-      const ADMIN       = 'admin',
-            PWD         = 'Sniper991',
-            API_POST    = '/api/approved',
-            TOKENS_API  = '/tokens.json',
-            VOTES_API   = '/votes.json';
+      const API_LOGIN  = '/api/admin/login';
+      const API_POST   = '/api/approved';
+      const TOKENS_API = '/tokens.json';
+      const VOTES_API  = '/votes.json';
 
-      let pending   = JSON.parse(localStorage.getItem('coinvote_pending')) || [];
-      let approved  = [];
+      let pending  = JSON.parse(localStorage.getItem('coinvote_pending')) || [];
+      let approved = [];
 
       const loginCard = document.getElementById('loginCard');
       const panel     = document.getElementById('panel');
       const loginBtn  = document.getElementById('loginBtn');
 
-      loginBtn.addEventListener('click', () => {
+      loginBtn.addEventListener('click', async () => {
         const userVal = document.getElementById('user').value;
         const passVal = document.getElementById('pass').value;
-        if (userVal === ADMIN && passVal === PWD) {
+
+        try {
+          const res = await fetch(API_LOGIN, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: userVal, pass: passVal })
+          });
+          if (!res.ok) throw new Error('Unauthorized');
           loginCard.classList.add('hidden');
           panel.classList.remove('hidden');
           fetchApproved();
           loadAnalytics();
-        } else {
+        } catch {
           alert('Invalid credentials');
         }
       });
@@ -243,32 +247,35 @@
       }
 
       function render() {
-        // Pending
         const ulPend = document.getElementById('pendingList');
         ulPend.innerHTML = '';
         if (!pending.length) ulPend.innerHTML = '<li>No submissions</li>';
         pending.forEach((t, i) => {
-          const li  = document.createElement('li');
+          const li = document.createElement('li');
           const img = document.createElement('img');
           img.src = t.logo;
           img.className = 'logo-img';
+
           const det = document.createElement('div');
           det.className = 'details';
-          det.innerHTML =
-            `<div><strong>Name:</strong> ${t.name}</div>
-             <div><strong>Symbol:</strong> ${t.symbol}</div>
-             <div><strong>Description:</strong> ${t.description}</div>
-             <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
-             <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
-             <div><strong>X:</strong> ${t.xlink||'-'}</div>
-             <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
-             <div><strong>Chain:</strong> ${t.chain}</div>
-             <div><strong>Contract:</strong> ${t.contract}</div>
-             <div><strong>Presale:</strong> ${t.presale}</div>
-             <div><strong>Email:</strong> ${t.email}</div>
-             <div><strong>Contact TG:</strong> ${t.contactTelegram}</div>`;
+          det.innerHTML = `
+            <div><strong>Name:</strong> ${t.name}</div>
+            <div><strong>Symbol:</strong> ${t.symbol}</div>
+            <div><strong>Description:</strong> ${t.description}</div>
+            <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
+            <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
+            <div><strong>X:</strong> ${t.xlink||'-'}</div>
+            <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
+            <div><strong>Chain:</strong> ${t.chain}</div>
+            <div><strong>Contract:</strong> ${t.contract}</div>
+            <div><strong>Presale:</strong> ${t.presale}</div>
+            <div><strong>Email:</strong> ${t.email}</div>
+            <div><strong>Contact TG:</strong> ${t.contactTelegram}</div>
+          `;
+
           const act = document.createElement('div');
           act.className = 'actions';
+
           const aBtn = document.createElement('button');
           aBtn.textContent = 'Approve';
           aBtn.className = 'approve';
@@ -282,6 +289,7 @@
             savePending();
             fetchApproved();
           });
+
           const rBtn = document.createElement('button');
           rBtn.textContent = 'Reject';
           rBtn.className = 'reject';
@@ -290,41 +298,44 @@
             savePending();
             render();
           });
+
           act.append(aBtn, rBtn);
           li.append(img, det, act);
           ulPend.appendChild(li);
         });
 
-        // Approved
         const ulApp = document.getElementById('approvedList');
         ulApp.innerHTML = '';
         if (!approved.length) ulApp.innerHTML = '<li>No approved tokens</li>';
-        approved.forEach((t, i) => {
-          const li  = document.createElement('li');
+        approved.forEach((t) => {
+          const li = document.createElement('li');
           const img = document.createElement('img');
           img.src = t.logo;
           img.className = 'logo-img';
+
           const det = document.createElement('div');
           det.className = 'details';
-          det.innerHTML =
-            `<div><strong>Name:</strong> ${t.name}</div>
-             <div><strong>Symbol:</strong> ${t.symbol}</div>
-             <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
-             <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
-             <div><strong>X:</strong> ${t.xlink||'-'}</div>
-             <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
-             <div><strong>Votes:</strong> ${t.votes}</div>`;
+          det.innerHTML = `
+            <div><strong>Name:</strong> ${t.name}</div>
+            <div><strong>Symbol:</strong> ${t.symbol}</div>
+            <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
+            <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
+            <div><strong>X:</strong> ${t.xlink||'-'}</div>
+            <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
+            <div><strong>Votes:</strong> ${t.votes}</div>
+          `;
+
           const act2 = document.createElement('div');
           act2.className = 'actions';
+
           const dBtn = document.createElement('button');
           dBtn.textContent = 'Delete';
           dBtn.className = 'delete';
           dBtn.addEventListener('click', async () => {
-            await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`, {
-              method: 'DELETE'
-            });
+            await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`, { method: 'DELETE' });
             fetchApproved();
           });
+
           act2.append(dBtn);
           li.append(img, det, act2);
           ulApp.appendChild(li);
@@ -339,65 +350,33 @@
         const tokens   = await tokensRes.json();
         const votesMap = await votesRes.json();
 
-        // 1) Vote trends per day
+        // Trend data
         const trendCounts = {};
         for (const ip in votesMap) {
           for (const sym in votesMap[ip]) {
-            const day = new Date(votesMap[ip][sym])
-              .toISOString()
-              .split('T')[0];
+            const day = new Date(votesMap[ip][sym]).toISOString().split('T')[0];
             trendCounts[day] = (trendCounts[day] || 0) + 1;
           }
         }
-        const trendEl = document.getElementById('trendData');
-        trendEl.innerHTML =
-          '<table style="width:100%;border-collapse:collapse;">' +
-          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Date</th>' +
-          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Votes</th></tr>' +
-          Object.entries(trendCounts)
-            .map(
-              ([day, count]) =>
-                `<tr><td style="padding:0.5rem;">${day}</td><td style="padding:0.5rem;">${count}</td></tr>`
-            )
-            .join('') +
-          '</table>';
+        document.getElementById('trendData').innerHTML = Object.entries(trendCounts).map(
+          ([day, count]) => `<div>${day}: ${count}</div>`
+        ).join('');
 
-        // 2) Top 5 most-voted tokens
-        const top5 = [...tokens]
-          .sort((a, b) => b.votes - a.votes)
-          .slice(0, 5);
-        const topEl = document.getElementById('topData');
-        topEl.innerHTML =
-          '<table style="width:100%;border-collapse:collapse;">' +
-          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Token</th>' +
-          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Votes</th></tr>' +
-          top5
-            .map(
-              (t) =>
-                `<tr><td style="padding:0.5rem;">${t.name} (${t.symbol})</td>` +
-                `<td style="padding:0.5rem;">${t.votes}</td></tr>`
-            )
-            .join('') +
-          '</table>';
+        // Top 5
+        const top5 = [...tokens].sort((a,b)=>b.votes-a.votes).slice(0,5);
+        document.getElementById('topData').innerHTML = top5.map(
+          t => `<div>${t.name} (${t.symbol}): ${t.votes}</div>`
+        ).join('');
 
-        // 3) Submissions per day
+        // Submissions per day
         const subCounts = {};
-        tokens.forEach((t) => {
+        tokens.forEach(t => {
           const day = new Date(t.createdAt).toISOString().split('T')[0];
           subCounts[day] = (subCounts[day] || 0) + 1;
         });
-        const subEl = document.getElementById('submissionsData');
-        subEl.innerHTML =
-          '<table style="width:100%;border-collapse:collapse;">' +
-          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Date</th>' +
-          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">New Submissions</th></tr>' +
-          Object.entries(subCounts)
-            .map(
-              ([day, count]) =>
-                `<tr><td style="padding:0.5rem;">${day}</td><td style="padding:0.5rem;">${count}</td></tr>`
-            )
-            .join('') +
-          '</table>';
+        document.getElementById('submissionsData').innerHTML = Object.entries(subCounts).map(
+          ([day, count]) => `<div>${day}: ${count}</div>`
+        ).join('');
       }
     })();
   </script>
