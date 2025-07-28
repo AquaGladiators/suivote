@@ -38,7 +38,7 @@
       justify-content: space-between;
     }
     .logo { font-size: 1.75rem; color: var(--accent); font-weight: 700; }
-    .nav-toggle { display: none; }
+    .nav-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; }
     .nav-links {
       display: flex;
       gap: 1rem;
@@ -99,8 +99,7 @@
       gap: 1rem;
       padding: 2rem;
     }
-    .left,
-    .right {
+    .left, .right {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -139,47 +138,86 @@
     }
     tbody tr { transition: background 0.2s; cursor: pointer; }
     tbody tr:hover { background: var(--hover); }
-    tbody td { padding: 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
 
-    .logo-img { width: 40px; height: 40px; border-radius: var(--radius); border: 1px solid var(--border); object-fit: cover; }
+    .logo-img {
+      width: 40px; height: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
     .details { display: flex; flex-direction: column; }
     .details .name { font-weight: 600; }
     .details .symbol { font-size: 0.85rem; color: var(--text-secondary); }
 
     .link-btn, .vote-btn {
       padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.85rem;
+      border: none; border-radius: var(--radius);
+      background: var(--accent); color: #fff;
+      cursor: pointer; font-size: 0.85rem;
       text-decoration: none;
-      display: inline-block;
       transition: background 0.2s;
     }
     .link-btn:hover, .vote-btn:hover { background: var(--accent-dark); }
-    .vote-btn.disabled { background: var(--border); cursor: not-allowed; opacity:0.6; }
+    .vote-btn.disabled { background: var(--border); cursor: not-allowed; opacity: 0.6; }
 
-    .new-title { padding: 1.5rem 1rem 0; text-align: center; color: var(--accent); font-size:1.25rem; }
-    .new-list { list-style:none; padding:1rem; }
-    .new-list li { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; border-bottom:1px solid var(--border); }
-    .new-list li:last-child { border-bottom:none; }
-    .small-logo { width:30px; height:30px; border-radius:var(--radius); border:1px solid var(--border); object-fit:cover; }
-    .new-name { font-weight:600; }
+    .new-title {
+      padding: 1.5rem 1rem 0;
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.25rem;
+    }
+    .new-list { list-style: none; padding: 1rem; }
+    .new-list li {
+      display: flex; align-items: center;
+      gap: 0.5rem; padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .new-list li:last-child { border-bottom: none; }
+    .small-logo {
+      width: 30px; height: 30px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .new-name { font-weight: 600; }
 
-    .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; visibility:hidden; }
-    .modal.open { visibility:visible; }
-    .modal-content { background:var(--card-bg); padding:2rem; border-radius:var(--radius); max-width:500px; width:90%; position:relative; }
-    .close-btn { position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text); font-size:1.5rem; cursor:pointer; }
-    .info-row { margin-bottom:0.5rem; }
+    .modal {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.7);
+      display: flex; justify-content: center; align-items: center;
+      visibility: hidden;
+    }
+    .modal.open { visibility: visible; }
+    .modal-content {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: var(--radius);
+      max-width:500px; width:90%;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute; top:1rem; right:1rem;
+      background:none; border:none;
+      color:var(--text); font-size:1.5rem;
+      cursor:pointer;
+    }
+    .info-row { margin-bottom: 0.5rem; }
 
+    /* Responsive */
     @media (max-width: 767px) {
-      .nav-toggle { display:block; background:transparent; border:none; color:var(--text); font-size:1.5rem; }
-      .nav-links { display:none; flex-direction:column; padding:1rem; gap:1rem; }
-      main.container { flex-direction:column; padding:1rem; }
-      .header { flex-direction:column; gap:0.5rem; }
-      .search { width:100%; }
+      nav { padding: 1rem; }
+      .nav-toggle { display: block; }
+      .nav-links { display: none; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+      main.container { flex-direction: column; padding: 1rem; }
+      .header { flex-direction: column; gap: 0.5rem; }
+      .search { width: 100%; }
+      table { min-width: 500px; }
+      .new-list { padding: 0 0.5rem; }
     }
   </style>
 </head>
@@ -238,47 +276,106 @@
     const KEY = 'coinvote_voted';
     let approved = [];
     let voted = JSON.parse(localStorage.getItem(KEY)) || [];
+
     const socket = io();
-    socket.on('voteUpdate', ({symbol,votes}) => {
-      const tok = approved.find(t=>t.symbol===symbol);
-      if(!tok) return;
-      tok.votes=votes;
-      renderTable(); renderTrending();
+    socket.on('voteUpdate', ({symbol, votes}) => {
+      const tok = approved.find(t => t.symbol === symbol);
+      if (!tok) return;
+      tok.votes = votes;
+      renderTable();
+      renderTrending();
     });
+
     document.addEventListener('DOMContentLoaded', () => {
       loadData();
-      document.getElementById('search').addEventListener('input', e=>filter(e.target.value));
+      document.getElementById('search').addEventListener('input', e => filter(e.target.value));
       document.getElementById('closeModal').onclick = () => document.getElementById('detailModal').classList.remove('open');
     });
+
     async function loadData() {
       const res = await fetch(GET_API);
       approved = await res.json();
-      renderTable(); renderNew(); renderTrending();
+      renderTable();
+      renderNew();
+      renderTrending();
     }
+
     function filter(q) {
-      q=q.toLowerCase();
-      document.querySelectorAll('#approvedTable tbody tr').forEach(tr=>{tr.style.display=tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q)?'':'none';});
+      q = q.toLowerCase();
+      document.querySelectorAll('#approvedTable tbody tr').forEach(tr => {
+        tr.style.display = tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
     }
+
     function renderTable() {
-      const list=approved.slice().sort((a,b)=>b.votes-a.votes).slice(0,50);
-      const tbody=document.querySelector('#approvedTable tbody'); tbody.innerHTML='';
-      if(!list.length){ tbody.innerHTML='<tr><td colspan="6" style="text-align:center;">No tokens</td></tr>';return; }
-      list.forEach((t,i)=>{
-        const has=voted.includes(t.symbol);
-        const tr=document.createElement('tr'); tr.onclick=()=>showDetails(t);
-        tr.innerHTML=
-          `<td>${i+1}</td><td><img src="${t.logo}" class="logo-img"></td>`+
-          `<td>${t.name} <small>(${t.symbol})</small></td>`+
-          `<td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Site</a>`:'-'}</td>`+
-          `<td>${t.votes}</td>`+
+      const list = approved.slice().sort((a,b)=>b.votes-a.votes).slice(0,50);
+      const tbody = document.querySelector('#approvedTable tbody');
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No tokens</td></tr>';
+        return;
+      }
+      list.forEach((t,i) => {
+        const has = voted.includes(t.symbol);
+        const tr = document.createElement('tr');
+        tr.onclick = () => showDetails(t);
+        tr.innerHTML =
+          `<td>${i+1}</td>` +
+          `<td><img src="${t.logo}" class="logo-img" alt="${t.name}"></td>` +
+          `<td>${t.name} <small>(${t.symbol})</small></td>` +
+          `<td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Site</a>`:'-'}</td>` +
+          `<td>${t.votes}</td>` +
           `<td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''} onclick="event.stopPropagation();vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`;
         tbody.appendChild(tr);
       });
     }
-    function renderNew() {const list=approved.slice(-10).reverse();const ul=document.getElementById('newList');ul.innerHTML='';list.forEach(t=>{const li=document.createElement('li');li.innerHTML=`<img src="${t.logo}" class="small-logo"><div class="new-name">${t.name}</div>`;ul.appendChild(li);});}
-    function renderTrending() {const list=approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10);const container=document.getElementById('trendingList');container.innerHTML='';list.forEach(t=>{const span=document.createElement('span');span.className='trending-item';span.textContent=`${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;span.onclick=()=>showDetails(t);container.appendChild(span);});}
-    async function vote(sym){if(voted.includes(sym))return;const res=await fetch(VOTE_API(sym),{method:'PUT'});if(res.status===429){const{error}=await res.json();alert(error);return;}if(!res.ok)return alert('Vote failed');voted.push(sym);localStorage.setItem(KEY,JSON.stringify(voted));loadData();}
-    function showDetails(t){document.getElementById('modalInfo').innerHTML=`<h3>${t.name} (${t.symbol})</h3><p>${t.description||'No description'}</p><p><strong>Chain:</strong> ${t.chain||'-'}</p><p><strong>Contract:</strong> ${t.contract||'-'}</p>`;document.getElementById('detailModal').classList.add('open');}
+
+    function renderNew() {
+      const list = approved.slice(-10).reverse();
+      const ul = document.getElementById('newList');
+      ul.innerHTML = '';
+      list.forEach(t => {
+        const li = document.createElement('li');
+        li.innerHTML = `<img src="${t.logo}" class="small-logo"><div class="new-name">${t.name}</div>`;
+        ul.appendChild(li);
+      });
+    }
+
+    function renderTrending() {
+      const list = approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10);
+      const container = document.getElementById('trendingList');
+      container.innerHTML = '';
+      list.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'trending-item';
+        span.textContent = `${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
+        span.onclick = () => showDetails(t);
+        container.appendChild(span);
+      });
+    }
+
+    async function vote(sym) {
+      if (voted.includes(sym)) return;
+      const res = await fetch(VOTE_API(sym), { method:'PUT' });
+      if (res.status === 429) {
+        const { error } = await res.json();
+        return alert(error);
+      }
+      if (!res.ok) return alert('Vote failed');
+      voted.push(sym);
+      localStorage.setItem(KEY, JSON.stringify(voted));
+      loadData();
+    }
+
+    function showDetails(t) {
+      const modal = document.getElementById('detailModal');
+      document.getElementById('modalInfo').innerHTML =
+        `<h3>${t.name} (${t.symbol})</h3>` +
+        `<p>${t.description||'No description'}</p>` +
+        `<p><strong>Chain:</strong> ${t.chain||'-'}</p>` +
+        `<p><strong>Contract:</strong> ${t.contract||'-'}</p>`;
+      modal.classList.add('open');
+    }
   </script>
 </body>
 </html>
