@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="title" content="Suivote: Today's Rising Cryptocurrencies">
+  <meta name="description" content="Suivote is a leading cryptocurrency aggregation platform, spotlighting early‑stage tokens, NFTs, and meme coins with high potential. Beyond daily listings, it delivers real‑time vote rankings, newly listed coins, and community insights.">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://suivote.cc/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://suivote.cc/">
+  <meta property="og:title"       content="Suivote: Today's Rising Cryptocurrencies">
+  <meta property="og:description" content="Suivote is a leading cryptocurrency aggregation platform, spotlighting early‑stage tokens, NFTs, and meme coins with high potential.">
+  <meta property="og:image"       content="https://suivote.cc/og-image.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:url"         content="https://suivote.cc/">
+  <meta name="twitter:title"       content="Suivote: Today's Rising Cryptocurrencies">
+  <meta name="twitter:description" content="Suivote is a leading cryptocurrency aggregation platform, spotlighting early‑stage tokens, NFTs, and meme coins with high potential.">
+  <meta name="twitter:image"       content="https://suivote.cc/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suivote: Today's Rising Cryptocurrenciese</title>
+  <style>
+  :root {
+    --bg: #1f2125; --card-bg: #2a2d31; --text: #e0e0e0; --text-secondary: #777;
+    --accent: #4fa3ff; --accent-dark: #3a88d0; --border: #3a3d41; --hover: #323539;
+    --radius: 8px; --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --highlight: rgba(79,163,255,0.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  nav {
+    background: var(--card-bg); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center;
+  }
+  .logo {
+    font-size: 1.75rem; color: var(--accent); font-weight: 700;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .logo-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%; object-fit: cover;
+  }
+  .nav-links { margin-left: auto; }
+  .nav-links button, .nav-links a {
+    margin-left: 1rem; padding: 0.5rem 1rem; border: none;
+    border-radius: var(--radius); background: var(--accent);
+    color: #fff; text-decoration: none; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-links button { background: #fff; color: var(--accent); font-weight: bold; }
+  .nav-links button:hover, .nav-links a:hover { background: var(--accent-dark); }
+
+  main.container {
+    flex: 1; display: flex; gap: 1rem; padding: 2rem;
+  }
+  .left, .right {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .left { flex: 3; display: flex; flex-direction: column; }
+  .right { flex: 1; max-height: calc(100vh - 128px); overflow-y: auto; }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem;
+  }
+  .search {
+    width: 300px; padding: 0.5rem 1rem; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--bg); color: var(--text);
+  }
+
+  table {
+    width: 100%; border-collapse: collapse;
+  }
+  thead th {
+    padding: 0.75rem 1rem; font-size: 0.85rem; text-transform: uppercase;
+    color: var(--text-secondary); border-bottom: 1px solid var(--border);
+    background: var(--card-bg); text-align: left;
+  }
+  tbody tr {
+    transition: background 0.2s; cursor: pointer;
+  }
+  tbody tr:hover {
+    background: var(--hover);
+  }
+  tbody td {
+    padding: 1rem; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .logo-img {
+    width: 40px; height: 40px; border-radius: var(--radius);
+    border: 1px solid var(--border); object-fit: cover;
+  }
+  .details { display: flex; flex-direction: column; }
+  .details .name { font-weight: 600; }
+  .details .symbol {
+    font-size: 0.85rem; color: var(--text-secondary);
+  }
+
+  .link-btn, .vote-btn {
+    padding: 0.4rem 0.8rem; border: none; border-radius: var(--radius);
+    background: var(--accent); color: #fff; cursor: pointer;
+    font-size: 0.85rem; text-decoration: none; display: inline-block;
+    transition: background 0.2s;
+  }
+  .link-btn:hover, .vote-btn:hover { background: var(--accent-dark); }
+  .vote-btn.disabled { background: var(--border); cursor: not-allowed; opacity: 0.6; }
+
+  @keyframes blink {
+    from { background: var(--highlight); } to { background: transparent; }
+  }
+  .blink { animation: blink 1s ease-out; }
+
+  /* Newly Listed sidebar */
+  .new-title {
+    padding: 1.5rem 1rem 0; text-align: center;
+    color: var(--accent); font-size: 1.25rem;
+  }
+  .new-list { list-style: none; padding: 1rem; }
+  .new-list li {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+  }
+  .new-list li:last-child { border-bottom: none; }
+  .small-logo {
+    width: 30px; height: 30px; border-radius: var(--radius);
+    border: 1px solid var(--border); object-fit: cover;
+  }
+  .new-name { font-weight: 600; }
+
+  /* Modal */
+  .modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; justify-content: center; align-items: center;
+    visibility: hidden;
+  }
+  .modal.open { visibility: visible; }
+  .modal-content {
+    background: var(--card-bg); padding: 2rem; border-radius: var(--radius);
+    max-width: 500px; width: 90%; position: relative;
+  }
+  .close-btn {
+    position: absolute; top: 1rem; right: 1rem; background: none;
+    border: none; color: var(--text); font-size: 1.5rem; cursor: pointer;
+  }
+  .info-row { margin-bottom: 0.5rem; }
+</style>
+
+</head>
+<body>
+
+  <nav>
+    <img src="/logo.png" alt="Logo" style="width:32px;height:32px;margin-right:10px;border-radius:6px;" />
+    <div class="logo">SuiVote</div>
+    <div class="nav-links">
+      <button onclick="location.href='submit.html'">Submit</button>
+      <a href="https://t.me/sui_vote" target="_blank">Telegram</a>
+      <a href="https://x.com/Sui_Vote" target="_blank">X</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="left">
+      <div class="header">
+        <h1 class="logo">Top Voted Tokens</h1>
+        <input id="search" class="search" placeholder="Search coins..." />
+      </div>
+      <table id="approvedTable">
+        <thead>
+          <tr>
+            <th>#</th><th>Logo</th><th>Coin</th>
+            <th>Website</th><th>TG</th><th>X</th>
+            <th>Buy</th><th>Votes</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="right">
+      <div class="new-title">Newly Listed</div>
+      <ul id="newList" class="new-list"></ul>
+    </div>
+  </main>
+
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <button id="closeModal" class="close-btn">×</button>
+      <h3 id="modalTitle"></h3>
+      <div id="modalInfo"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const GET_API   = '/api/approved';
+    const VOTE_API  = s => `/api/approved/${encodeURIComponent(s)}/vote`;
+    const KEY       = 'coinvote_voted';
+
+    let approved = [];
+    let voted    = JSON.parse(localStorage.getItem(KEY)) || [];
+
+    const socket = io();
+    socket.on('voteUpdate', ({symbol, votes}) => {
+      const tok = approved.find(t => t.symbol === symbol);
+      if (!tok) return;
+      tok.votes = votes;
+      renderTable(approved);
+      blinkRow(symbol);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      document.getElementById('search').addEventListener('input', e => filter(e.target.value));
+      document.getElementById('closeModal').onclick = () => {
+        document.getElementById('detailModal').classList.remove('open');
+      };
+    });
+
+    async function loadData() {
+      const res = await fetch(GET_API);
+      approved = await res.json();
+      renderTable(approved);
+      renderNew(approved);
+    }
+
+    function filter(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('#approvedTable tbody tr').forEach(tr => {
+        const name = tr.querySelector('.name').textContent.toLowerCase();
+        tr.style.display = name.includes(q) ? '' : 'none';
+      });
+    }
+
+    function blinkRow(sym) {
+      const row = document.querySelector(`tr[data-symbol="${sym}"]`);
+      if (row) {
+        row.classList.add('blink');
+        setTimeout(() => row.classList.remove('blink'), 1000);
+      }
+    }
+
+    function renderTable(list) {
+      const top50 = list.sort((a,b)=>b.votes-a.votes).slice(0,50);
+      const tbody = document.querySelector('#approvedTable tbody');
+      tbody.innerHTML = '';
+      if (!top50.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text-secondary);padding:1rem;">
+          No approved tokens
+        </td></tr>`;
+        return;
+      }
+      top50.forEach((t,i) => {
+        const has = voted.includes(t.symbol);
+        const tr  = document.createElement('tr');
+        tr.dataset.symbol = t.symbol;
+        tr.onclick = () => showDetails(t);
+        tr.innerHTML = `
+          <td>${i+1}</td>
+          <td><img src="${t.logo}" class="logo-img" alt="${t.name}"></td>
+          <td class="details"><span class="name">${t.name}</span><span class="symbol">${t.symbol}</span></td>
+          <td>${t.website?`<a href="${t.website}" target="_blank" class="link-btn">Visit</a>`:'-'}</td>
+          <td>${t.telegram?`<a href="${t.telegram}" target="_blank" class="link-btn">TG</a>`:'-'}</td>
+          <td>${t.xlink?`<a href="${t.xlink}" target="_blank" class="link-btn">X</a>`:'-'}</td>
+          <td>${t.buyLink?`<a href="${t.buyLink}" target="_blank" class="link-btn">Buy</a>`:'-'}</td>
+          <td>${t.votes}</td>
+          <td><button class="vote-btn ${has?'disabled':''}" ${has?'disabled':''}
+              onclick="event.stopPropagation(); vote('${t.symbol}')">
+              ${has?'Voted':'Vote'}
+          </button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderNew(list) {
+      const last20 = list.slice(-20).reverse();
+      const ul     = document.getElementById('newList');
+      ul.innerHTML = '';
+      last20.forEach(t => {
+        const li  = document.createElement('li');
+        const img = document.createElement('img');
+        img.src   = t.logo; img.className = 'small-logo';
+        img.alt   = t.name;
+        li.appendChild(img);
+
+        const ctr = document.createElement('div');
+        ctr.style.flex = '1';
+
+        const nm = document.createElement('div');
+        nm.className   = 'new-name';
+        nm.textContent = t.name;
+        ctr.appendChild(nm);
+
+        const row = document.createElement('div');
+        row.style.display   = 'flex';
+        row.style.gap       = '0.25rem';
+        row.style.marginTop = '0.25rem';
+        row.style.flexWrap  = 'wrap';
+
+        const makeLink = (url, label) => {
+          const a = document.createElement('a');
+          a.href       = url;
+          a.target     = '_blank';
+          a.textContent= label;
+          a.className  = 'link-btn';
+          a.style.padding   = '0.25rem 0.5rem';
+          a.style.fontSize  = '0.75rem';
+          return a;
+        };
+        if (t.website)  row.appendChild(makeLink(t.website, 'Site'));
+        if (t.telegram) row.appendChild(makeLink(t.telegram,'TG'));
+        if (t.xlink)    row.appendChild(makeLink(t.xlink,   'X'));
+        if (t.buyLink)  row.appendChild(makeLink(t.buyLink, 'Buy'));
+
+        const has = voted.includes(t.symbol);
+        const vb  = document.createElement('button');
+        vb.textContent = has ? 'Voted' : 'Vote';
+        vb.className   = 'vote-btn';
+        vb.disabled    = has;
+        vb.style.padding  = '0.25rem 0.5rem';
+        vb.style.fontSize = '0.75rem';
+        vb.addEventListener('click', () => vote(t.symbol));
+        row.appendChild(vb);
+
+        ctr.appendChild(row);
+        li.appendChild(ctr);
+        ul.appendChild(li);
+      });
+    }
+
+    async function vote(symbol) {
+      if (voted.includes(symbol)) return;
+      const res = await fetch(VOTE_API(symbol), { method:'PUT' });
+      if (res.status === 429) {
+        const { error } = await res.json();
+        return alert(error);
+      }
+      if (!res.ok) return alert('Vote failed');
+      voted.push(symbol);
+      localStorage.setItem(KEY, JSON.stringify(voted));
+      loadData();
+    }
+
+    function showDetails(t) {
+      const modal = document.getElementById('detailModal');
+      document.getElementById('modalTitle').textContent = `${t.name} (${t.symbol})`;
+      const info = document.getElementById('modalInfo');
+      info.innerHTML =
+        `<div class="info-row"><strong>Description:</strong> ${t.description || '-'}</div>
+         <div class="info-row"><strong>Chain:</strong> ${t.chain}</div>
+         <div class="info-row"><strong>Contract:</strong> ${t.contract}</div>
+         <div class="info-row"><strong>Presale:</strong> ${t.presale}</div>`;
+      modal.classList.add('open');
+    }
+  </script>
+</body>
+</html>

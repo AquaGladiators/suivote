@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel – CoinVote</title>
+  <style>
+    :root {
+      --bg: #1f2125;
+      --card-bg: #2a2d31;
+      --text: #e0e0e0;
+      --text-light: #777;
+      --accent: #4fa3ff;
+      --accent-dark: #3a88d0;
+      --danger: #e74c3c;
+      --border: #3a3d41;
+      --hover: #323539;
+      --radius: 8px;
+      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    *, body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+    }
+    nav {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      font-size: 1.75rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .nav-links {
+      margin-left: auto;
+    }
+    .nav-links a {
+      margin-left: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-links a:hover {
+      background: var(--accent-dark);
+    }
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      margin-bottom: 2rem;
+    }
+    section {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    section:last-child {
+      border-bottom: none;
+    }
+    h2 {
+      margin-bottom: 1rem;
+      color: var(--accent);
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    li:last-child {
+      border-bottom: none;
+    }
+    .logo-img {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      flex: 1;
+    }
+    .details div strong {
+      color: var(--text);
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .actions button {
+      padding: 0.5rem;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    .approve {
+      background: var(--accent);
+    }
+    .reject, .delete {
+      background: var(--danger);
+    }
+    .hidden {
+      display: none;
+    }
+
+    /* Analytics placeholders */
+    .analytics-section {
+      padding: 1.5rem;
+    }
+    .chart-placeholder {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">CoinVote Admin</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="submit.html">Submit</a>
+      <a href="admin.html" id="adminBtn">Admin</a>
+    </div>
+  </nav>
+  <main>
+    <div class="card" id="loginCard">
+      <section>
+        <h2>Admin Login</h2>
+        <input id="user" type="text" placeholder="Username"
+               style="width:100%;padding:0.5rem;margin-bottom:1rem;
+                      border:1px solid var(--border);border-radius:var(--radius);
+                      background:var(--bg);color:var(--text);">
+        <input id="pass" type="password" placeholder="Password"
+               style="width:100%;padding:0.5rem;margin-bottom:1rem;
+                      border:1px solid var(--border);border-radius:var(--radius);
+                      background:var(--bg);color:var(--text);">
+        <button id="loginBtn"
+                style="width:100%;padding:0.75rem;background:var(--accent);
+                       border:none;border-radius:var(--radius);color:#fff;cursor:pointer;">
+          Log In
+        </button>
+      </section>
+    </div>
+
+    <div class="card hidden" id="panel">
+      <section>
+        <h2>Pending Submissions</h2>
+        <ul id="pendingList"></ul>
+      </section>
+      <section>
+        <h2>Approved Tokens</h2>
+        <ul id="approvedList"></ul>
+      </section>
+      <section class="analytics-section">
+        <h2>Analytics Data</h2>
+        <div class="chart-placeholder" id="trendData">Trend: Loading...</div>
+        <div class="chart-placeholder" id="topData">Top5: Loading...</div>
+        <div class="chart-placeholder" id="submissionsData">Subs: Loading...</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const ADMIN       = 'admin',
+            PWD         = 'Sniper991',
+            API_POST    = '/api/approved',
+            TOKENS_API  = '/tokens.json',
+            VOTES_API   = '/votes.json';
+
+      let pending   = JSON.parse(localStorage.getItem('coinvote_pending')) || [];
+      let approved  = [];
+
+      const loginCard = document.getElementById('loginCard');
+      const panel     = document.getElementById('panel');
+      const loginBtn  = document.getElementById('loginBtn');
+
+      loginBtn.addEventListener('click', () => {
+        const userVal = document.getElementById('user').value;
+        const passVal = document.getElementById('pass').value;
+        if (userVal === ADMIN && passVal === PWD) {
+          loginCard.classList.add('hidden');
+          panel.classList.remove('hidden');
+          fetchApproved();
+          loadAnalytics();
+        } else {
+          alert('Invalid credentials');
+        }
+      });
+
+      async function fetchApproved() {
+        const res = await fetch('/api/approved');
+        approved = await res.json();
+        render();
+      }
+
+      function savePending() {
+        localStorage.setItem('coinvote_pending', JSON.stringify(pending));
+      }
+
+      function render() {
+        // Pending
+        const ulPend = document.getElementById('pendingList');
+        ulPend.innerHTML = '';
+        if (!pending.length) ulPend.innerHTML = '<li>No submissions</li>';
+        pending.forEach((t, i) => {
+          const li  = document.createElement('li');
+          const img = document.createElement('img');
+          img.src = t.logo;
+          img.className = 'logo-img';
+          const det = document.createElement('div');
+          det.className = 'details';
+          det.innerHTML =
+            `<div><strong>Name:</strong> ${t.name}</div>
+             <div><strong>Symbol:</strong> ${t.symbol}</div>
+             <div><strong>Description:</strong> ${t.description}</div>
+             <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
+             <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
+             <div><strong>X:</strong> ${t.xlink||'-'}</div>
+             <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
+             <div><strong>Chain:</strong> ${t.chain}</div>
+             <div><strong>Contract:</strong> ${t.contract}</div>
+             <div><strong>Presale:</strong> ${t.presale}</div>
+             <div><strong>Email:</strong> ${t.email}</div>
+             <div><strong>Contact TG:</strong> ${t.contactTelegram}</div>`;
+          const act = document.createElement('div');
+          act.className = 'actions';
+          const aBtn = document.createElement('button');
+          aBtn.textContent = 'Approve';
+          aBtn.className = 'approve';
+          aBtn.addEventListener('click', async () => {
+            await fetch(API_POST, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(t)
+            });
+            pending.splice(i, 1);
+            savePending();
+            fetchApproved();
+          });
+          const rBtn = document.createElement('button');
+          rBtn.textContent = 'Reject';
+          rBtn.className = 'reject';
+          rBtn.addEventListener('click', () => {
+            pending.splice(i, 1);
+            savePending();
+            render();
+          });
+          act.append(aBtn, rBtn);
+          li.append(img, det, act);
+          ulPend.appendChild(li);
+        });
+
+        // Approved
+        const ulApp = document.getElementById('approvedList');
+        ulApp.innerHTML = '';
+        if (!approved.length) ulApp.innerHTML = '<li>No approved tokens</li>';
+        approved.forEach((t, i) => {
+          const li  = document.createElement('li');
+          const img = document.createElement('img');
+          img.src = t.logo;
+          img.className = 'logo-img';
+          const det = document.createElement('div');
+          det.className = 'details';
+          det.innerHTML =
+            `<div><strong>Name:</strong> ${t.name}</div>
+             <div><strong>Symbol:</strong> ${t.symbol}</div>
+             <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
+             <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
+             <div><strong>X:</strong> ${t.xlink||'-'}</div>
+             <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
+             <div><strong>Votes:</strong> ${t.votes}</div>`;
+          const act2 = document.createElement('div');
+          act2.className = 'actions';
+          const dBtn = document.createElement('button');
+          dBtn.textContent = 'Delete';
+          dBtn.className = 'delete';
+          dBtn.addEventListener('click', async () => {
+            await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`, {
+              method: 'DELETE'
+            });
+            fetchApproved();
+          });
+          act2.append(dBtn);
+          li.append(img, det, act2);
+          ulApp.appendChild(li);
+        });
+      }
+
+      async function loadAnalytics() {
+        const [tokensRes, votesRes] = await Promise.all([
+          fetch(TOKENS_API),
+          fetch(VOTES_API)
+        ]);
+        const tokens   = await tokensRes.json();
+        const votesMap = await votesRes.json();
+
+        // 1) Vote trends per day
+        const trendCounts = {};
+        for (const ip in votesMap) {
+          for (const sym in votesMap[ip]) {
+            const day = new Date(votesMap[ip][sym])
+              .toISOString()
+              .split('T')[0];
+            trendCounts[day] = (trendCounts[day] || 0) + 1;
+          }
+        }
+        const trendEl = document.getElementById('trendData');
+        trendEl.innerHTML =
+          '<table style="width:100%;border-collapse:collapse;">' +
+          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Date</th>' +
+          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Votes</th></tr>' +
+          Object.entries(trendCounts)
+            .map(
+              ([day, count]) =>
+                `<tr><td style="padding:0.5rem;">${day}</td><td style="padding:0.5rem;">${count}</td></tr>`
+            )
+            .join('') +
+          '</table>';
+
+        // 2) Top 5 most-voted tokens
+        const top5 = [...tokens]
+          .sort((a, b) => b.votes - a.votes)
+          .slice(0, 5);
+        const topEl = document.getElementById('topData');
+        topEl.innerHTML =
+          '<table style="width:100%;border-collapse:collapse;">' +
+          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Token</th>' +
+          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Votes</th></tr>' +
+          top5
+            .map(
+              (t) =>
+                `<tr><td style="padding:0.5rem;">${t.name} (${t.symbol})</td>` +
+                `<td style="padding:0.5rem;">${t.votes}</td></tr>`
+            )
+            .join('') +
+          '</table>';
+
+        // 3) Submissions per day
+        const subCounts = {};
+        tokens.forEach((t) => {
+          const day = new Date(t.createdAt).toISOString().split('T')[0];
+          subCounts[day] = (subCounts[day] || 0) + 1;
+        });
+        const subEl = document.getElementById('submissionsData');
+        subEl.innerHTML =
+          '<table style="width:100%;border-collapse:collapse;">' +
+          '<tr><th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">Date</th>' +
+          '<th style="border-bottom:1px solid var(--border);padding:0.5rem;text-align:left;">New Submissions</th></tr>' +
+          Object.entries(subCounts)
+            .map(
+              ([day, count]) =>
+                `<tr><td style="padding:0.5rem;">${day}</td><td style="padding:0.5rem;">${count}</td></tr>`
+            )
+            .join('') +
+          '</table>';
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit New Coin – CoinVote</title>
+  <style>
+    :root {
+      --bg: #1f2125;
+      --card-bg: #2a2d31;
+      --text: #e0e0e0;
+      --text-light: #777;
+      --accent: #4fa3ff;
+      --accent-dark: #3a88d0;
+      --border: #3a3d41;
+      --hover: #323539;
+      --radius: 8px;
+      --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+    nav {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo { font-size: 1.75rem; color: var(--accent); font-weight: 700; }
+    .nav-links { margin-left: auto; }
+    .nav-links button {
+      margin-left: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-links button:hover { background: var(--accent-dark); }
+
+    .wizard {
+      max-width: 600px;
+      margin: 2.5rem auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .wizard-header {
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .wizard-header h1 { color: var(--accent); }
+
+    .steps {
+      display: flex;
+      background: var(--card-bg);
+    }
+    .step {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .step.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    form {
+      padding: 1.5rem;
+    }
+    .form-step {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+    .form-step.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    label { display: block; margin: 0.5rem 0 0.25rem; color: var(--text-light); }
+    input[type=file], input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .buttons button:hover { background: var(--accent-dark); }
+    .btn-prev {
+      background: var(--border);
+    }
+    .btn-prev:hover {
+      background: var(--hover);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">CoinVote</div>
+    <div class="nav-links">
+      <button onclick="location.href='index.html'">Home</button>
+      <button onclick="location.href='submit.html'">Submit</button>
+    </div>
+  </nav>
+
+  <div class="wizard">
+    <div class="wizard-header"><h1>Submit New Coin</h1></div>
+    <div class="steps">
+      <div class="step active" data-step="1">Basic Info</div>
+      <div class="step" data-step="2">Links</div>
+      <div class="step" data-step="3">Market</div>
+      <div class="step" data-step="4">Contact</div>
+    </div>
+    <form id="wizardForm" novalidate>
+      <!-- Step 1 -->
+      <div class="form-step active" data-step="1">
+        <label for="logoFile">Logo (500×500)*</label>
+        <input type="file" id="logoFile" accept="image/png,image/jpeg" required>
+        <label for="name">Name*</label>
+        <input type="text" id="name" maxlength="40" required>
+        <label for="symbol">Symbol*</label>
+        <input type="text" id="symbol" maxlength="15" required>
+        <label for="description">Description*</label>
+        <textarea id="description" maxlength="500" required></textarea>
+      </div>
+      <!-- Step 2 -->
+      <div class="form-step" data-step="2">
+        <label for="website">Website*</label>
+        <input type="url" id="website" required>
+        <label for="telegram">Telegram</label>
+        <input type="url" id="telegram">
+        <label for="xlink">X (Twitter)</label>
+        <input type="url" id="xlink">
+        <label for="buyLink">Buy Link</label>
+        <input type="url" id="buyLink">
+      </div>
+      <!-- Step 3 -->
+      <div class="form-step" data-step="3">
+        <label for="chain">Chain*</label>
+        <select id="chain" required>
+          <option value="Sui Network">Sui Network</option>
+        </select>
+        <label for="contract">Contract Address*</label>
+        <input type="text" id="contract" required>
+        <label for="presale">Presale?*</label>
+        <select id="presale" required>
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      <!-- Step 4 -->
+      <div class="form-step" data-step="4">
+        <label for="email">Contact Email*</label>
+        <input type="email" id="email" required>
+        <label for="contactTelegram">Contact Telegram*</label>
+        <input type="text" id="contactTelegram" placeholder="@username" required>
+        <label>
+          <input type="checkbox" id="agree" required> I agree to the Terms*
+        </label>
+      </div>
+
+      <div class="buttons">
+        <button type="button" class="btn-prev">Previous</button>
+        <button type="button" class="btn-next">Next</button>
+        <button type="submit" class="btn-submit" style="display:none;">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Step wizard logic
+    const steps     = document.querySelectorAll('.step');
+    const formSteps = document.querySelectorAll('.form-step');
+    const btnPrev   = document.querySelector('.btn-prev');
+    const btnNext   = document.querySelector('.btn-next');
+    const btnSubmit = document.querySelector('.btn-submit');
+    const form      = document.getElementById('wizardForm');
+    let current = 1;
+
+    function showStep(n) {
+      formSteps.forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+      steps    .forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+      btnPrev.style.display   = n > 1 ? 'inline-block' : 'none';
+      btnNext.style.display   = n < steps.length ? 'inline-block' : 'none';
+      btnSubmit.style.display = n === steps.length ? 'inline-block' : 'none';
+    }
+
+    btnNext.addEventListener('click', () => {
+      const reqs = formSteps[current-1].querySelectorAll('input[required], select[required], textarea[required]');
+      for (let r of reqs) {
+        if (!r.value) { alert('Please fill all required fields.'); return; }
+      }
+      current++;
+      showStep(current);
+    });
+
+    btnPrev.addEventListener('click', () => {
+      current--;
+      showStep(current);
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const fileInput = document.getElementById('logoFile');
+      if (!fileInput.files.length) { alert('Please upload a logo'); return; }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const data = {
+          logo: reader.result,
+          name: document.getElementById('name').value,
+          symbol: document.getElementById('symbol').value,
+          description: document.getElementById('description').value,
+          website: document.getElementById('website').value,
+          telegram: document.getElementById('telegram').value,
+          xlink: document.getElementById('xlink').value,
+          buyLink: document.getElementById('buyLink').value,
+          chain: document.getElementById('chain').value,
+          contract: document.getElementById('contract').value,
+          presale: document.getElementById('presale').value,
+          email: document.getElementById('email').value,
+          contactTelegram: document.getElementById('contactTelegram').value,
+          votes: 0
+        };
+        const pending = JSON.parse(localStorage.getItem('coinvote_pending')) || [];
+        pending.push(data);
+        localStorage.setItem('coinvote_pending', JSON.stringify(pending));
+        alert('Submitted! Pending admin approval.');
+        location.href = 'index.html';
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    });
+
+    showStep(current);
+  </script>
+</body>
+</html>
