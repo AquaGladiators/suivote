@@ -130,7 +130,7 @@
   <nav>
     <div class="logo">CoinVote</div>
     <div class="nav-links">
-      <button onclick="location.href='/'">Home</button>
+      <button onclick="location.href='index.html'">Home</button>
       <button onclick="location.href='submit.html'">Submit</button>
     </div>
   </nav>
@@ -200,7 +200,7 @@
   </div>
 
   <script>
-    // Step wizard logic
+    // Step wizard logic (unchanged)
     const steps     = document.querySelectorAll('.step');
     const formSteps = document.querySelectorAll('.form-step');
     const btnPrev   = document.querySelector('.btn-prev');
@@ -231,13 +231,14 @@
       showStep(current);
     });
 
+    // *** UPDATED: POST to server instead of localStorage ***
     form.addEventListener('submit', e => {
       e.preventDefault();
       const fileInput = document.getElementById('logoFile');
       if (!fileInput.files.length) { alert('Please upload a logo'); return; }
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const data = {
+      reader.onloadend = async () => {
+        const payload = {
           logo: reader.result,
           name: document.getElementById('name').value,
           symbol: document.getElementById('symbol').value,
@@ -251,13 +252,22 @@
           presale: document.getElementById('presale').value,
           email: document.getElementById('email').value,
           contactTelegram: document.getElementById('contactTelegram').value,
-          votes: 0
+          votes: 0,
+          ranking: 0.0
         };
-        const pending = JSON.parse(localStorage.getItem('coinvote_pending')) || [];
-        pending.push(data);
-        localStorage.setItem('coinvote_pending', JSON.stringify(pending));
-        alert('Submitted! Pending admin approval.');
-        location.href = 'index.html';
+        try {
+          const res = await fetch('/api/approved', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error('Network response was not OK');
+          alert('Submitted! Pending admin approval.');
+          window.location.href = 'index.html';
+        } catch (err) {
+          console.error(err);
+          alert('Submission failed. Please try again.');
+        }
       };
       reader.readAsDataURL(fileInput.files[0]);
     });
