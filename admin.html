@@ -93,6 +93,25 @@
     }
     .approve { background: var(--accent); }
     .reject { background: var(--danger); }
+    /* Votes adjuster */
+    .actions input[type="number"][name="setVotes"] {
+      width:4rem; padding:0.3rem;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:var(--card-bg);
+      color:var(--text);
+    }
+    .set-votes { background: var(--accent-dark); }
+    /* Safety adjuster */
+    .actions input[type="number"].ranking {
+      width:5rem; padding:0.3rem;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:var(--card-bg);
+      color:var(--text);
+    }
+    .set-rank { background: #ffa726; }
+    .delete { background: var(--danger); }
     .hidden { display:none; }
     .analytics-section { padding:1.5rem; }
     .chart-placeholder {
@@ -154,7 +173,6 @@
     const API_APPROVE = '/api/approved';
     const STORAGE_KEY = 'coinvote_pending';
 
-    // Load pending submissions from localStorage
     let pending = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let approved = [];
 
@@ -163,116 +181,51 @@
           pendUl    = document.getElementById('pendingList'),
           appUl     = document.getElementById('approvedList');
 
-    // --- Login ---
     document.getElementById('loginBtn').onclick = async () => {
       try {
         const user = document.getElementById('user').value;
         const pass = document.getElementById('pass').value;
         const res = await fetch(API_LOGIN, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+          method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({user,pass})
         });
         if (!res.ok) throw new Error();
-        loginCard.classList.add('hidden');
-        panel.classList.remove('hidden');
-        fetchApproved();
-        renderPending();
+        loginCard.classList.add('hidden'); panel.classList.remove('hidden');
+        fetchApproved(); renderPending();
       } catch {
         alert('Invalid credentials');
       }
     };
 
-    // --- Fetch approved from server ---
     async function fetchApproved(){
       const res = await fetch(API_APPROVE);
       approved = await res.json();
       renderApproved();
     }
 
-    // --- Save pending back to localStorage ---
-    function savePending(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
-    }
+    function savePending(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(pending)); }
 
-    // --- Render Pending Submissions ---
     function renderPending(){
       pendUl.innerHTML = '';
-      if (!pending.length) {
-        pendUl.innerHTML = '<li>No submissions</li>';
-        return;
-      }
-      pending.forEach((t, i) => {
+      if (!pending.length) return void (pendUl.innerHTML = '<li>No submissions</li>');
+      pending.forEach((t,i)=>{
         const li = document.createElement('li');
         li.innerHTML = `
           <img src="${t.logo}" class="logo-img" alt="logo">
           <div class="details">
             <div><strong>Name:</strong> ${t.name}</div>
             <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <div><strong>Description:</strong> ${t.description || '-'}</div>
-            <div><strong>Chain:</strong> ${t.chain || '-'}</div>
-            <div><strong>Contract:</strong> ${t.contract || '-'}</div>
-            <div><strong>Website:</strong> ${t.website ? `<a href="${t.website}" target="_blank">Visit</a>` : '-'}</div>
-            <div><strong>Telegram:</strong> ${t.telegram ? `<a href="${t.telegram}" target="_blank">Link</a>` : '-'}</div>
-            <div><strong>X:</strong> ${t.xlink ? `<a href="${t.xlink}" target="_blank">Link</a>` : '-'}</div>
-            <div><strong>Buy Link:</strong> ${t.buyLink ? `<a href="${t.buyLink}" target="_blank">Buy</a>` : '-'}</div>
+            <div><strong>Description:</strong> ${t.description||'-'}</div>
+            <div><strong>Chain:</strong> ${t.chain||'-'}</div>
+            <div><strong>Contract:</strong> ${t.contract||'-'}</div>
+            <div><strong>Website:</strong> ${t.website?`<a href="${t.website}" target="_blank">Visit</a>`:'-'}</div>
+            <div><strong>Telegram:</strong> ${t.telegram?`<a href="${t.telegram}" target="_blank">Link</a>`:'-'}</div>
+            <div><strong>X:</strong> ${t.xlink?`<a href="${t.xlink}" target="_blank">Link</a>`:'-'}</div>
+            <div><strong>Buy Link:</strong> ${t.buyLink?`<a href="${t.buyLink}" target="_blank">Buy</a>`:'-'}</div>
           </div>
           <div class="actions">
             <button class="approve">Approve</button>
             <button class="reject">Reject</button>
-          </div>
-        `;
-        // Approve handler
-        li.querySelector('.approve').onclick = async () => {
-          try {
-            const res = await fetch(API_APPROVE, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(t)
-            });
-            if (!res.ok) throw new Error();
-            // remove from pending
-            pending.splice(i, 1);
-            savePending();
-            renderPending();
-            fetchApproved();
-          } catch {
-            alert('Failed to approve');
-          }
-        };
-        // Reject handler
-        li.querySelector('.reject').onclick = () => {
-          pending.splice(i, 1);
-          savePending();
-          renderPending();
-        };
-        pendUl.appendChild(li);
-      });
-    }
-
-    // --- Render Already Approved ---
-    function renderApproved(){
-      appUl.innerHTML = '';
-      if (!approved.length) {
-        appUl.innerHTML = '<li>No approved tokens</li>';
-        return;
-      }
-      approved.forEach(t => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <img src="${t.logo}" class="logo-img" alt="logo">
-          <div class="details">
-            <div><strong>Name:</strong> ${t.name}</div>
-            <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <div><strong>Website:</strong> ${t.website ? `<a href="${t.website}" target="_blank">Visit</a>` : '-'}</div>
-            <div><strong>Votes:</strong> ${t.votes}</div>
-            <div><strong>Safety Rank:</strong> ${t.ranking.toFixed(1)}</div>
-          </div>
-        `;
-        appUl.appendChild(li);
-      });
-    }
-  })();
-  </script>
-</body>
-</html>
+          </div>`;
+        li.querySelector('.approve').onclick = async ()=>{
+n          try {
