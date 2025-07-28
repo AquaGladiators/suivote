@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
   <title>Suivote: Today's Rising Cryptocurrencies</title>
   <meta name="description" content="Spotlight on early-stage tokens, NFTs, and meme coins with real‑time vote rankings, safety score, and newly listed section.">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <style>
     :root {
       --bg:#1f2125;--card-bg:#2a2d31;--text:#e0e0e0;--text-secondary:#777;
@@ -84,7 +84,7 @@
     <div class="logo">SuiVote</div>
     <button class="nav-toggle" onclick="toggleNav()">☰</button>
     <div class="nav-links" id="navLinks">
-      <button onclick="location.href='#'">Submit</button>
+      <button onclick="location.href='submit.html'">Submit</button>
       <a href="https://t.me/sui_vote" target="_blank">Telegram</a>
       <a href="https://x.com/Sui_Vote" target="_blank">X</a>
     </div>
@@ -110,11 +110,7 @@
               <th>Safety</th><th>Votes</th><th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td colspan="10" style="text-align:center;color:var(--text-secondary);">
-              Loading tokens…
-            </td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -135,40 +131,40 @@
     </div>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     function toggleNav() {
       const nav = document.getElementById('navLinks');
       nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
     }
-
-    const KEY = 'coinvote_voted';
+    const GET_API = '/api/approved',
+          VOTE_API = s => `/api/approved/${encodeURIComponent(s)}/vote`,
+          KEY = 'coinvote_voted';
     let approved = [], voted = JSON.parse(localStorage.getItem(KEY)) || [];
+
+    const socket = io();
+    socket.on('voteUpdate', ({symbol, votes}) => {
+      const t = approved.find(x => x.symbol === symbol);
+      if (!t) return;
+      t.votes = votes; renderTable(); renderTrending();
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       loadData();
-      document.getElementById('search')
-        .addEventListener('input', e => filter(e.target.value));
-      document.getElementById('closeModal')
-        .onclick = () => document.getElementById('detailModal').classList.remove('open');
+      document.getElementById('search').addEventListener('input', e => filter(e.target.value));
+      document.getElementById('closeModal').onclick = () => document.getElementById('detailModal').classList.remove('open');
     });
 
     async function loadData() {
-      try {
-        const res = await fetch('tokens.json');
-        approved = await res.json();
-        renderTable();
-        renderNew();
-        renderTrending();
-      } catch(err) {
-        console.error(err);
-      }
+      const res = await fetch(GET_API);
+      approved = await res.json();
+      renderTable(); renderNew(); renderTrending();
     }
 
     function filter(q) {
       q = q.toLowerCase();
       document.querySelectorAll('#approvedTable tbody tr').forEach(tr => {
-        const name = tr.querySelector('td:nth-child(3)');
-        tr.style.display = name && name.textContent.toLowerCase().includes(q) ? '' : 'none';
+        tr.style.display = tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q) ? '' : 'none';
       });
     }
 
@@ -198,10 +194,7 @@
            <td>${t.buyLink?`<a href="${t.buyLink}" class="link-btn" target="_blank">Buy</a>`:'-'}</td>
            <td class="safety ${cls}">${rank}/100</td>
            <td>${t.votes}</td>
-           <td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''}
-                   onclick="event.stopPropagation();vote('${t.symbol}')">
-                 ${has?'Voted':'Vote'}
-               </button></td>`;
+           <td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''} onclick="event.stopPropagation();vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -218,39 +211,29 @@
     }
 
     function renderTrending() {
-  // sort by 24h votes, highest first, take top 10
-  const list = approved
-    .slice()
-    .sort((a, b) => (b.votes24h || 0) - (a.votes24h || 0))
-    .slice(0, 10);
+      const list = approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10),
+            cont = document.getElementById('trendingList');
+      cont.innerHTML = '';
+      list.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'trending-item';
+        span.textContent = `${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
+        span.onclick = () => showDetails(t);
+        cont.appendChild(span);
+      });
+    }
 
-  const cont = document.getElementById('trendingList');
-  cont.innerHTML = '';
-
-  list.forEach(t => {
-    const span = document.createElement('span');
-    span.className = 'trending-item';
-
-    // default to zero if undefined
-    const newVotes = t.votes24h != null ? t.votes24h : 0;
-
-    span.textContent = `${t.name} (${t.symbol}) ⋅ ${newVotes} new votes`;
-    span.onclick = () => showDetails(t);
-    cont.appendChild(span);
-  });
-}
-
-
-    function vote(sym) {
+    async function vote(sym) {
       if (voted.includes(sym)) return;
-      // this demo only updates locally; remove/comment out for real API:
-      const t = approved.find(x=>x.symbol===sym);
-      if (!t) return;
-      t.votes++;
+      const res = await fetch(VOTE_API(sym),{method:'PUT'});
+      if (res.status===429) {
+        const {error} = await res.json();
+        return alert(error);
+      }
+      if (!res.ok) return alert('Vote failed');
       voted.push(sym);
       localStorage.setItem(KEY, JSON.stringify(voted));
-      renderTable();
-      renderTrending();
+      loadData();
     }
 
     function showDetails(t) {
