@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Suivote: Today's Rising Cryptocurrencies</title>
   <meta name="description" content="Suivote is a leading cryptocurrency aggregation platform, spotlighting early-stage tokens, NFTs, and meme coins with high potential.">
-
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-
   <style>
     :root {
       --bg: #1f2125;
@@ -20,7 +18,6 @@
       --hover: #323539;
       --radius: 8px;
       --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      --highlight: rgba(79,163,255,0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -34,229 +31,76 @@
     nav {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
+      padding: 1rem;
       display: flex;
       align-items: center;
+      justify-content: space-between;
     }
-    .logo {
-      font-size: 1.75rem;
-      color: var(--accent);
-      font-weight: 700;
+    .logo { font-size: 1.5rem; color: var(--accent); font-weight: 700; }
+    .nav-links { display: none; }
+    .nav-toggle { display: block; background: transparent; border: none; color: var(--text); font-size: 1.5rem; }
+    main.container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
     }
-    .nav-links { margin-left: auto; }
-    .nav-links button,
-    .nav-links a {
-      margin-left: 1rem;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .nav-links button {
-      background: #fff;
-      color: var(--accent);
-      font-weight: bold;
-    }
-    .nav-links button:hover,
-    .nav-links a:hover {
-      background: var(--accent-dark);
-    }
-
-    /* Glass‑morphic trending bar */
+    /* Trending bar */
     .trending-bar {
-      margin: 1rem 2rem;
-      padding: 1rem 1.5rem;
+      padding: 0.75rem;
       background: rgba(30,30,35,0.4);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: var(--radius);
       overflow: hidden;
     }
-    .trending-label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-    .trending-list {
-      display: inline-flex;
-      animation: scroll-left 16s linear infinite;
-    }
-    .trending-item {
-      margin: 0 1rem;
-      padding: 0.4rem 0.8rem;
-      background: linear-gradient(135deg, #4fa3ff, #2fd0c9);
-      color: #fff;
-      font-weight: 600;
-      border-radius: var(--radius);
-      cursor: pointer;
-      white-space: nowrap;
-      transform: skewX(-10deg);
-      transition: transform 0.3s;
-    }
-    .trending-item:hover {
-      transform: skewX(0deg) scale(1.1);
-    }
-    @keyframes scroll-left {
-      0%   { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    main.container {
-      flex: 1;
-      display: flex;
-      gap: 1rem;
-      padding: 2rem;
-    }
-    .left,
-    .right {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-    .left { flex: 3; }
-    .right {
-      flex: 1;
-      max-height: calc(100vh - 128px);
-      overflow-y: auto;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-    }
-    .search {
-      width: 300px;
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    thead th {
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border);
-      background: var(--card-bg);
-      text-align: left;
-    }
-    tbody tr {
-      transition: background 0.2s;
-      cursor: pointer;
-    }
-    tbody tr:hover {
-      background: var(--hover);
-    }
-    tbody td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-
-    .logo-img {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      object-fit: cover;
-    }
+    .trending-label { font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .trending-list { display: inline-flex; animation: scroll-left 12s linear infinite; }
+    .trending-item { margin: 0 0.5rem; padding: 0.3rem 0.6rem; background: var(--accent); color: #fff; font-weight: 600; border-radius: var(--radius); white-space: nowrap; transform: skewX(-8deg); transition: transform 0.2s; }
+    .trending-item:hover { transform: skewX(0deg) scale(1.05); }
+    @keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    /* Table */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead th { padding: 0.5rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); border-bottom: 1px solid var(--border); background: var(--card-bg); text-align: left; }
+    tbody tr { cursor: pointer; transition: background 0.2s; }
+    tbody tr:hover { background: var(--hover); }
+    td { padding: 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .logo-img { width: 32px; height: 32px; border-radius: var(--radius); }
     .details { display: flex; flex-direction: column; }
-    .details .name { font-weight: 600; }
-    .details .symbol { font-size: 0.85rem; color: var(--text-secondary); }
-
-    .link-btn,
-    .vote-btn {
-      padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.85rem;
-      text-decoration: none;
-      display: inline-block;
-      transition: background 0.2s;
-    }
-    .link-btn:hover,
-    .vote-btn:hover {
-      background: var(--accent-dark);
-    }
-    .vote-btn.disabled {
-      background: var(--border);
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    .new-title {
-      padding: 1.5rem 1rem 0;
-      text-align: center;
-      color: var(--accent);
-      font-size: 1.25rem;
-    }
-    .new-list {
-      list-style: none;
-      padding: 1rem;
-    }
-    .new-list li {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .new-list li:last-child { border-bottom: none; }
-    .small-logo {
-      width: 30px;
-      height: 30px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      object-fit: cover;
-    }
-    .new-name { font-weight: 600; }
-
-    .modal {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex; justify-content: center; align-items: center;
-      visibility: hidden;
-    }
+    .details .name { font-size: 0.9rem; font-weight: 600; }
+    .details .symbol { font-size: 0.7rem; color: var(--text-secondary); }
+    .link-btn, .vote-btn { padding: 0.3rem 0.6rem; border-radius: var(--radius); background: var(--accent); color: #fff; font-size: 0.75rem; border: none; cursor: pointer; }
+    .vote-btn.disabled { background: var(--border); cursor: not-allowed; }
+    /* New list */
+    .new-title { font-size: 0.9rem; color: var(--accent); margin-top: 1rem; }
+    .new-list { display: flex; overflow-x: auto; gap: 0.5rem; padding: 0.5rem 0; }
+    .new-list li { flex: 0 0 auto; background: var(--card-bg); padding: 0.5rem; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; }
+    .small-logo { width: 40px; height: 40px; border-radius: var(--radius); }
+    .new-name { font-size: 0.8rem; margin: 0.25rem 0; }
+    /* Modal */
+    .modal { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.7); display: flex; align-items:center; justify-content:center; visibility: hidden; }
     .modal.open { visibility: visible; }
-    .modal-content {
-      background: var(--card-bg);
-      padding: 2rem;
-      border-radius: var(--radius);
-      max-width: 500px;
-      width: 90%;
-      position: relative;
+    .modal-content { background: var(--card-bg); padding:1rem; border-radius: var(--radius); width: 90%; max-width: 400px; }
+    .close-btn { position: absolute; top:0.5rem; right:0.5rem; background:none; border:none; color: var(--text); font-size:1.25rem; }
+    .info-row { font-size:0.85rem; margin-bottom:0.5rem; }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .nav-toggle { display: none; }
+      .nav-links { display: flex; }
+      main.container { flex-direction: row; }
+      .left { flex: 3; }
+      .right { flex: 1; }
     }
-    .close-btn {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none;
-      color: var(--text); font-size: 1.5rem;
-      cursor: pointer;
-    }
-    .info-row { margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
-
   <nav>
     <div class="logo">SuiVote</div>
-    <div class="nav-links">
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <div class="nav-links" id="navLinks">
       <button onclick="location.href='submit.html'">Submit</button>
       <a href="https://t.me/sui_vote" target="_blank">Telegram</a>
       <a href="https://x.com/Sui_Vote" target="_blank">X</a>
@@ -271,19 +115,19 @@
   <main class="container">
     <div class="left">
       <div class="header">
-        <h1>All Time Top Voted Tokens</h1>
-        <input id="search" class="search" placeholder="Search coins...">
+        <h1>Top Voted Tokens</h1>
+        <input id="search" class="search" placeholder="Search coins..." style="width:100%;">
       </div>
-      <table id="approvedTable">
-        <thead>
-          <tr>
-            <th>#</th><th>Logo</th><th>Coin</th>
-            <th>Website</th><th>TG</th><th>X</th>
-            <th>Buy</th><th>Votes</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table id="approvedTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Logo</th><th>Coin</th><th>Votes</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
     <div class="right">
       <div class="new-title">Newly Listed</div>
@@ -294,13 +138,17 @@
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <button id="closeModal" class="close-btn">×</button>
-      <h3 id="modalTitle"></h3>
       <div id="modalInfo"></div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    function toggleNav() {
+      const nav = document.getElementById('navLinks');
+      nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+    }
+
     const GET_API = '/api/approved';
     const VOTE_API = s => '/api/approved/' + encodeURIComponent(s) + '/vote';
     const KEY = 'coinvote_voted';
@@ -313,16 +161,15 @@
       const tok = approved.find(t => t.symbol === symbol);
       if (!tok) return;
       tok.votes = votes;
+      tok.votes24h = tok.votes24h; // keep
       renderTable();
       renderTrending();
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       loadData();
       document.getElementById('search').addEventListener('input', e => filter(e.target.value));
-      document.getElementById('closeModal').onclick = () => {
-        document.getElementById('detailModal').classList.remove('open');
-      };
+      document.getElementById('closeModal').onclick = () => document.getElementById('detailModal').classList.remove('open');
     });
 
     async function loadData() {
@@ -336,91 +183,56 @@
     function filter(q) {
       q = q.toLowerCase();
       document.querySelectorAll('#approvedTable tbody tr').forEach(tr => {
-        tr.style.display = tr.querySelector('.name').textContent.toLowerCase().includes(q) ? '' : 'none';
+        tr.style.display = tr.querySelector('td:nth-child(3)').textContent.toLowerCase().includes(q) ? '' : 'none';
       });
     }
 
     function renderTable() {
       const list = approved.slice().sort((a,b)=>b.votes-a.votes).slice(0,50);
-      const tbody = document.querySelector('#approvedTable tbody');
-      tbody.innerHTML = '';
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No tokens</td></tr>';
-        return;
-      }
-      list.forEach((t,i) => {
+      const tbody = document.querySelector('#approvedTable tbody');tbody.innerHTML='';
+      if(!list.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;">No tokens</td></tr>'; return; }
+      list.forEach((t,i)=>{
         const has = voted.includes(t.symbol);
         const tr = document.createElement('tr');
-        tr.dataset.symbol = t.symbol;
         tr.onclick = () => showDetails(t);
-        tr.innerHTML = `
-          <td>${i+1}</td>
-          <td><img src="${t.logo}" class="logo-img" alt="${t.name}"></td>
-          <td class="details"><span class="name">${t.name}</span><span class="symbol">${t.symbol}</span></td>
-          <td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Visit</a>`:'-'}</td>
-          <td>${t.telegram?`<a href="${t.telegram}" class="link-btn" target="_blank">TG</a>`:'-'}</td>
-          <td>${t.xlink?`<a href="${t.xlink}" class="link-btn" target="_blank">X</a>`:'-'}</td>
-          <td>${t.buyLink?`<a href="${t.buyLink}" class="link-btn" target="_blank">Buy</a>`:'-'}</td>
-          <td>${t.votes}</td>
-          <td><button class="vote-btn ${has?'disabled':''}" ${has?'disabled':''} onclick="event.stopPropagation(); vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`;
+        tr.innerHTML = `<td>${i+1}</td><td><img src="${t.logo}" class="logo-img"></td><td>${t.name} <small>(${t.symbol})</small></td><td>${t.votes}</td><td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''} onclick="event.stopPropagation();vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`;
         tbody.appendChild(tr);
       });
     }
 
     function renderNew() {
-      const list = approved.slice(-20).reverse();
-      const ul = document.getElementById('newList'); ul.innerHTML = '';
-      list.forEach(t => {
-        const li = document.createElement('li');
-        const img = document.createElement('img'); img.src = t.logo; img.className = 'small-logo'; img.alt = t.name; li.appendChild(img);
-        const div = document.createElement('div'); div.style.flex = '1';
-        const name = document.createElement('div'); name.className = 'new-name'; name.textContent = t.name; div.append(name);
-        const buttons = document.createElement('div'); buttons.style.display='flex'; buttons.style.gap='0.5rem';
-        ['website','telegram','xlink','buyLink'].forEach(key => {
-          if (t[key]) {
-            const a = document.createElement('a'); a.href = t[key]; a.target='_blank'; a.className='link-btn';
-            a.textContent = key==='website'?'Site': key==='telegram'?'TG': key==='xlink'?'X':'Buy';
-            buttons.appendChild(a);
-          }
-        });
-        const vb = document.createElement('button'); vb.className='vote-btn'; vb.textContent=voted.includes(t.symbol)?'Voted':'Vote'; vb.disabled=voted.includes(t.symbol);
-        vb.onclick=()=>vote(t.symbol);
-        buttons.appendChild(vb);
-        div.append(buttons);
-        li.append(div);
-        ul.append(li);
+      const list = approved.slice(-10).reverse();
+      const ul = document.getElementById('newList');ul.innerHTML='';
+      list.forEach(t=>{
+        const li=document.createElement('li');
+        li.innerHTML=`<img src="${t.logo}" class="small-logo"><div class="new-name">${t.name}</div>`;
+        ul.appendChild(li);
       });
     }
 
     function renderTrending() {
-      const list = approved.slice().sort((a,b)=>b.votes24h - a.votes24h).slice(0,10);
-      const container = document.getElementById('trendingList'); container.innerHTML='';
-      list.forEach(t => {
-        const span = document.createElement('span'); span.className='trending-item';
-        span.textContent = `${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
-        span.onclick = () => showDetails(t);
-        container.appendChild(span);
+      const list = approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10);
+      const container=document.getElementById('trendingList');container.innerHTML='';
+      list.forEach(t=>{
+        const span=document.createElement('span');span.className='trending-item';
+        span.textContent=`${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
+        span.onclick=()=>showDetails(t);container.appendChild(span);
       });
     }
 
-    async function vote(symbol) {
-      if (voted.includes(symbol)) return;
-      const res = await fetch(VOTE_API(symbol), { method:'PUT' });
-      if (res.status===429) { const { error } = await res.json(); return alert(error); }
-      if (!res.ok) return alert('Vote failed');
-      voted.push(symbol);
-      localStorage.setItem(KEY, JSON.stringify(voted));
+    async function vote(sym) {
+      if(voted.includes(sym))return;
+      const res=await fetch(VOTE_API(sym),{method:'PUT'});
+      if(res.status===429){const{error}=await res.json();return alert(error);}if(!res.ok)return alert('Vote failed');
+      voted.push(sym);
+      localStorage.setItem(KEY,JSON.stringify(voted));
       loadData();
     }
 
-    function showDetails(t) {
-      document.getElementById('modalTitle').textContent = `${t.name} (${t.symbol})`;
-      document.getElementById('modalInfo').innerHTML =
-        `<div class="info-row"><strong>Description:</strong> ${t.description||'-'}</div>` +
-        `<div class="info-row"><strong>Chain:</strong> ${t.chain||'-'}</div>` +
-        `<div class="info-row"><strong>Contract:</strong> ${t.contract||'-'}</div>` +
-        `<div class="info-row"><strong>Presale:</strong> ${t.presale||'-'}</div>`;
-      document.getElementById('detailModal').classList.add('open');
+    function showDetails(t){
+      const m=document.getElementById('detailModal');
+      document.getElementById('modalInfo').innerHTML=`<h3>${t.name} (${t.symbol})</h3><p>${t.description||'No description'}</p><p><strong>Chain:</strong> ${t.chain||'-'}</p><p><strong>Contract:</strong> ${t.contract||'-'}</p>`;
+      m.classList.add('open');
     }
   </script>
 </body>
