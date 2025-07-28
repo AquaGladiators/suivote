@@ -92,25 +92,7 @@
       font-size:0.9rem;
     }
     .approve { background: var(--accent); }
-    .reject, .delete { background: var(--danger); }
-    /* Votes adjuster */
-    .actions input[type="number"] {
-      width:4rem; padding:0.3rem;
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-      background:var(--card-bg);
-      color:var(--text);
-    }
-    .set-votes { background: var(--accent-dark); }
-    /* Safety adjuster */
-    .actions input[type="number"].ranking {
-      width:5rem; padding:0.3rem;
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-      background:var(--card-bg);
-      color:var(--text);
-    }
-    .set-rank { background: #ffa726; } /* orange */
+    .reject { background: var(--danger); }
     .hidden { display:none; }
     .analytics-section { padding:1.5rem; }
     .chart-placeholder {
@@ -142,7 +124,9 @@
         <h2>Admin Login</h2>
         <input id="user" type="text" placeholder="Username" style="width:100%; margin-bottom:1rem;">
         <input id="pass" type="password" placeholder="Password" style="width:100%; margin-bottom:1rem;">
-        <button id="loginBtn" style="width:100%; padding:0.75rem; background:var(--accent); border:none; border-radius:var(--radius); color:#fff; cursor:pointer;">Log In</button>
+        <button id="loginBtn" style="width:100%; padding:0.75rem; background:var(--accent); border:none; border-radius:var(--radius); color:#fff; cursor:pointer;">
+          Log In
+        </button>
       </section>
     </div>
 
@@ -167,122 +151,126 @@
   <script>
   (async function(){
     const API_LOGIN = '/api/admin/login';
-    const API_POST  = '/api/approved';
-    const KEY = 'coinvote_pending';
-    let pending = JSON.parse(localStorage.getItem(KEY))||[];
+    const API_APPROVE = '/api/approved';
+    const STORAGE_KEY = 'coinvote_pending';
+
+    // Load pending submissions from localStorage
+    let pending = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let approved = [];
 
-    const loginCard = document.getElementById('loginCard');
-    const panel     = document.getElementById('panel');
+    const loginCard = document.getElementById('loginCard'),
+          panel     = document.getElementById('panel'),
+          pendUl    = document.getElementById('pendingList'),
+          appUl     = document.getElementById('approvedList');
 
+    // --- Login ---
     document.getElementById('loginBtn').onclick = async () => {
-      const user = document.getElementById('user').value;
-      const pass = document.getElementById('pass').value;
       try {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
         const res = await fetch(API_LOGIN, {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({user,pass})
         });
-        if(!res.ok) throw '';
+        if (!res.ok) throw new Error();
         loginCard.classList.add('hidden');
         panel.classList.remove('hidden');
         fetchApproved();
-        loadAnalytics();
+        renderPending();
       } catch {
         alert('Invalid credentials');
       }
     };
 
+    // --- Fetch approved from server ---
     async function fetchApproved(){
-      const res = await fetch('/api/approved');
+      const res = await fetch(API_APPROVE);
       approved = await res.json();
-      render();
+      renderApproved();
     }
 
+    // --- Save pending back to localStorage ---
     function savePending(){
-      localStorage.setItem(KEY,JSON.stringify(pending));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
     }
 
-    function render(){
-      // Pending
-      const ulPend = document.getElementById('pendingList');
-      ulPend.innerHTML = '';
-      if(!pending.length) ulPend.innerHTML='<li>No submissions</li>';
-      pending.forEach((t,i)=>{
+    // --- Render Pending Submissions ---
+    function renderPending(){
+      pendUl.innerHTML = '';
+      if (!pending.length) {
+        pendUl.innerHTML = '<li>No submissions</li>';
+        return;
+      }
+      pending.forEach((t, i) => {
         const li = document.createElement('li');
         li.innerHTML = `
-          <img src="${t.logo}" class="logo-img">
+          <img src="${t.logo}" class="logo-img" alt="logo">
           <div class="details">
             <div><strong>Name:</strong> ${t.name}</div>
             <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <!-- etc -->
+            <div><strong>Description:</strong> ${t.description || '-'}</div>
+            <div><strong>Chain:</strong> ${t.chain || '-'}</div>
+            <div><strong>Contract:</strong> ${t.contract || '-'}</div>
+            <div><strong>Website:</strong> ${t.website ? `<a href="${t.website}" target="_blank">Visit</a>` : '-'}</div>
+            <div><strong>Telegram:</strong> ${t.telegram ? `<a href="${t.telegram}" target="_blank">Link</a>` : '-'}</div>
+            <div><strong>X:</strong> ${t.xlink ? `<a href="${t.xlink}" target="_blank">Link</a>` : '-'}</div>
+            <div><strong>Buy Link:</strong> ${t.buyLink ? `<a href="${t.buyLink}" target="_blank">Buy</a>` : '-'}</div>
           </div>
           <div class="actions">
             <button class="approve">Approve</button>
             <button class="reject">Reject</button>
-          </div>`;
-        // attach handlers...
-        ulPend.appendChild(li);
-      });
-
-      // Approved
-      const ulApp = document.getElementById('approvedList');
-      ulApp.innerHTML = '';
-      if(!approved.length) ulApp.innerHTML='<li>No approved tokens</li>';
-      approved.forEach(t=>{
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <img src="${t.logo}" class="logo-img">
-          <div class="details">
-            <div><strong>Name:</strong> ${t.name}</div>
-            <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <div><strong>Website:</strong> <a href="${t.website}" target="_blank">Visit</a></div>
-            <div><strong>Votes:</strong> ${t.votes}</div>
-            <div><strong>Safety Rank:</strong> <input type="number" class="ranking" min="0" max="100" step="0.1" value="${t.ranking||0}"></div>
           </div>
-          <div class="actions">
-            <button class="set-votes">Set Votes</button>
-            <button class="set-rank">Set Rank</button>
-            <button class="delete">Delete</button>
-          </div>`;
-        // wire up vote setter
-        const inpVotes = li.querySelector('.actions input[type="number"]');
-        const btnSetVotes = li.querySelector('.set-votes');
-        btnSetVotes.onclick = async () => {
-          const nv = parseInt(inpVotes.value,10);
-          if(isNaN(nv)||nv<0) return alert('Invalid votes');
-          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/votes`, {
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({votes:nv})
-          });
-          fetchApproved();
+        `;
+        // Approve handler
+        li.querySelector('.approve').onclick = async () => {
+          try {
+            const res = await fetch(API_APPROVE, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(t)
+            });
+            if (!res.ok) throw new Error();
+            // remove from pending
+            pending.splice(i, 1);
+            savePending();
+            renderPending();
+            fetchApproved();
+          } catch {
+            alert('Failed to approve');
+          }
         };
-        // wire up rank setter
-        const inpRank = li.querySelector('.ranking');
-        const btnSetRank = li.querySelector('.set-rank');
-        btnSetRank.onclick = async () => {
-          let nr = parseFloat(inpRank.value);
-          if(isNaN(nr)||nr<0||nr>100) return alert('Invalid rank (0–100)');
-          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/ranking`, {
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({ranking:nr})
-          });
-          fetchApproved();
+        // Reject handler
+        li.querySelector('.reject').onclick = () => {
+          pending.splice(i, 1);
+          savePending();
+          renderPending();
         };
-        // delete
-        li.querySelector('.delete').onclick = async () => {
-          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`,{method:'DELETE'});
-          fetchApproved();
-        };
-        ulApp.appendChild(li);
+        pendUl.appendChild(li);
       });
     }
 
-    async function loadAnalytics(){
-      // ...
+    // --- Render Already Approved ---
+    function renderApproved(){
+      appUl.innerHTML = '';
+      if (!approved.length) {
+        appUl.innerHTML = '<li>No approved tokens</li>';
+        return;
+      }
+      approved.forEach(t => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${t.logo}" class="logo-img" alt="logo">
+          <div class="details">
+            <div><strong>Name:</strong> ${t.name}</div>
+            <div><strong>Symbol:</strong> ${t.symbol}</div>
+            <div><strong>Website:</strong> ${t.website ? `<a href="${t.website}" target="_blank">Visit</a>` : '-'}</div>
+            <div><strong>Votes:</strong> ${t.votes}</div>
+            <div><strong>Safety Rank:</strong> ${t.ranking.toFixed(1)}</div>
+          </div>
+        `;
+        appUl.appendChild(li);
+      });
     }
   })();
   </script>
