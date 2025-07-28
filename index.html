@@ -42,23 +42,29 @@
       font-size: 1.75rem;
       color: var(--accent);
       font-weight: 700;
-      display: flex;
-      align-items: center;
     }
     .nav-links { margin-left: auto; }
-    .nav-links button, .nav-links a {
+    .nav-links button,
+    .nav-links a {
       margin-left: 1rem;
       padding: 0.5rem 1rem;
       border: none;
       border-radius: var(--radius);
       background: var(--accent);
       color: #fff;
-      cursor: pointer;
       text-decoration: none;
+      cursor: pointer;
       transition: background 0.2s;
     }
-    .nav-links button { background: #fff; color: var(--accent); }
-    .nav-links button:hover, .nav-links a:hover { background: var(--accent-dark); }
+    .nav-links button {
+      background: #fff;
+      color: var(--accent);
+      font-weight: bold;
+    }
+    .nav-links button:hover,
+    .nav-links a:hover {
+      background: var(--accent-dark);
+    }
 
     /* Glass‑morphic trending bar */
     .trending-bar {
@@ -106,22 +112,32 @@
       gap: 1rem;
       padding: 2rem;
     }
-    .left, .right {
+    .left,
+    .right {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
-    .left { flex: 3; }
-    .right { flex: 1; overflow-y: auto; }
+    .left {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+    }
+    .right {
+      flex: 1;
+      max-height: calc(100vh - 128px);
+      overflow-y: auto;
+    }
 
     .header {
-      padding: 1rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
     }
     .search {
+      width: 300px;
       padding: 0.5rem 1rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -134,7 +150,7 @@
       border-collapse: collapse;
     }
     thead th {
-      padding: 0.75rem;
+      padding: 0.75rem 1rem;
       font-size: 0.85rem;
       text-transform: uppercase;
       color: var(--text-secondary);
@@ -143,8 +159,8 @@
       text-align: left;
     }
     tbody tr {
-      cursor: pointer;
       transition: background 0.2s;
+      cursor: pointer;
     }
     tbody tr:hover {
       background: var(--hover);
@@ -152,59 +168,118 @@
     tbody td {
       padding: 1rem;
       border-bottom: 1px solid var(--border);
+      vertical-align: middle;
     }
 
-    .logo-img { width: 40px; height: 40px; border-radius: var(--radius); }
-    .details { display: flex; flex-direction: column; }
-    .details .name { font-weight: 600; }
-    .details .symbol { font-size: 0.85rem; color: var(--text-secondary); }
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .details {
+      display: flex;
+      flex-direction: column;
+    }
+    .details .name {
+      font-weight: 600;
+    }
+    .details .symbol {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
 
-    .link-btn, .vote-btn {
+    .link-btn,
+    .vote-btn {
       padding: 0.4rem 0.8rem;
       border: none;
       border-radius: var(--radius);
       background: var(--accent);
       color: #fff;
       cursor: pointer;
-      transition: background 0.2s;
+      font-size: 0.85rem;
       text-decoration: none;
       display: inline-block;
+      transition: background 0.2s;
     }
-    .link-btn:hover, .vote-btn:hover { background: var(--accent-dark); }
-    .vote-btn.disabled { background: var(--border); cursor: not-allowed; }
+    .link-btn:hover,
+    .vote-btn:hover {
+      background: var(--accent-dark);
+    }
+    .vote-btn.disabled {
+      background: var(--border);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
 
-    .new-title { padding: 1rem; text-align: center; color: var(--accent); }
-    .new-list { list-style: none; padding: 1rem; }
+    .new-title {
+      padding: 1.5rem 1rem 0;
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.25rem;
+    }
+    .new-list {
+      list-style: none;
+      padding: 1rem;
+    }
     .new-list li {
       display: flex;
       align-items: center;
+      gap: 0.5rem;
       padding: 0.5rem 0;
       border-bottom: 1px solid var(--border);
     }
-    .small-logo { width: 30px; height: 30px; border-radius: var(--radius); }
+    .new-list li:last-child {
+      border-bottom: none;
+    }
+    .small-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+    .new-name {
+      font-weight: 600;
+    }
 
     .modal {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(0,0,0,0.7);
-      display: flex; justify-content: center; align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       visibility: hidden;
     }
-    .modal.open { visibility: visible; }
+    .modal.open {
+      visibility: visible;
+    }
     .modal-content {
       background: var(--card-bg);
       padding: 2rem;
       border-radius: var(--radius);
-      max-width: 400px;
+      max-width: 500px;
       width: 90%;
       position: relative;
     }
     .close-btn {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none;
-      color: var(--text); font-size: 1.5rem;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
       cursor: pointer;
     }
-    .info-row { margin-bottom: 0.5rem; }
+    .info-row {
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -219,7 +294,7 @@
   </nav>
 
   <div class="trending-bar">
-    <div class="trending-label">24h Most Voted Coins</div>
+    <div class="trending-label">Top Voted Tokens</div>
     <div id="trendingList" class="trending-list"></div>
   </div>
 
@@ -291,8 +366,7 @@
     function filter(q) {
       q = q.toLowerCase();
       document.querySelectorAll('#approvedTable tbody tr').forEach(tr => {
-        const name = tr.querySelector('.name').textContent.toLowerCase();
-        tr.style.display = name.includes(q) ? '' : 'none';
+        tr.style.display = tr.querySelector('.name').textContent.toLowerCase().includes(q) ? '' : 'none';
       });
     }
 
@@ -310,15 +384,15 @@
         tr.dataset.symbol = t.symbol;
         tr.onclick = () => showDetails(t);
         tr.innerHTML =
-          '<td>' + (i+1) + '</td>' +
-          '<td><img src="'+t.logo+'" class="logo-img"></td>' +
-          '<td class="details"><div class="name">'+t.name+'</div><div class="symbol">'+t.symbol+'</div></td>' +
-          '<td>' + (t.website? '<a href="'+t.website+'" class="link-btn" target="_blank">Visit</a>':'-') + '</td>' +
-          '<td>' + (t.telegram? '<a href="'+t.telegram+'" class="link-btn" target="_blank">TG</a>':'-') + '</td>' +
-          '<td>' + (t.xlink? '<a href="'+t.xlink+'" class="link-btn" target="_blank">X</a>':'-') + '</td>' +
-          '<td>' + (t.buyLink? '<a href="'+t.buyLink+'" class="link-btn" target="_blank">Buy</a>':'-') + '</td>' +
-          '<td>'+t.votes+'</td>' +
-          '<td><button class="vote-btn'+(has?' disabled':'')+'"'+(has?' disabled':'')+' onclick="event.stopPropagation();vote(\''+t.symbol+'\')">'+(has?'Voted':'Vote')+'</button></td>';
+          `<td>${i+1}</td>` +
+          `<td><img src="${t.logo}" class="logo-img"></td>` +
+          `<td class="details"><div class="name">${t.name}</div><div class="symbol">${t.symbol}</div></td>` +
+          `<td>${t.website?`<a href="${t.website}" class="link-btn" target="_blank">Visit</a>`:'-'}</td>` +
+          `<td>${t.telegram?`<a href="${t.telegram}" class="link-btn" target="_blank">TG</a>`:'-'}</td>` +
+          `<td>${t.xlink?`<a href="${t.xlink}" class="link-btn" target="_blank">X</a>`:'-'}</td>` +
+          `<td>${t.buyLink?`<a href="${t.buyLink}" class="link-btn" target="_blank">Buy</a>`:'-'}</td>` +
+          `<td>${t.votes}</td>` +
+          `<td><button class="vote-btn${has?' disabled':''}"${has?' disabled':''} onclick="event.stopPropagation();vote('${t.symbol}')">${has?'Voted':'Vote'}</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -329,10 +403,9 @@
       list.forEach(t=> {
         const li = document.createElement('li');
         const img = document.createElement('img');
-        img.src = t.logo; img.className = 'small-logo';
+        img.src = t.logo; img.className = 'small-logo'; img.alt = t.name;
         li.appendChild(img);
-        const div = document.createElement('div');
-        div.style.flex = '1';
+        const div = document.createElement('div'); div.style.flex = '1';
         const name = document.createElement('div');
         name.className = 'new-name'; name.textContent = t.name;
         div.appendChild(name);
@@ -358,13 +431,13 @@
     }
 
     function renderTrending() {
-      const list = approved.slice().sort((a,b)=>b.votes24h - a.votes24h).slice(0,10);
+      const list = approved.slice().sort((a,b)=>b.votes - a.votes).slice(0,10);
       const container = document.getElementById('trendingList');
       container.innerHTML = '';
       list.forEach(t=>{
         const span = document.createElement('span');
         span.className = 'trending-item';
-        span.textContent = t.name + ' ('+t.symbol+') ⋅ '+t.votes24h+' new votes';
+        span.textContent = `${t.name} (${t.symbol}) ⋅ ${t.votes} votes`;
         span.onclick = ()=>showDetails(t);
         container.appendChild(span);
       });
@@ -372,24 +445,24 @@
 
     async function vote(symbol) {
       if (voted.includes(symbol)) return;
-      const res = await fetch(VOTE_API(symbol),{method:'PUT'});
-      if (res.status===429) {
-        const {error} = await res.json();
+      const res = await fetch(VOTE_API(symbol), { method:'PUT' });
+      if (res.status === 429) {
+        const { error } = await res.json();
         return alert(error);
       }
       if (!res.ok) return alert('Vote failed');
       voted.push(symbol);
-      localStorage.setItem(KEY,JSON.stringify(voted));
+      localStorage.setItem(KEY, JSON.stringify(voted));
       loadData();
     }
 
     function showDetails(t) {
-      document.getElementById('modalTitle').textContent = t.name + ' (' + t.symbol + ')';
+      document.getElementById('modalTitle').textContent = `${t.name} (${t.symbol})`;
       document.getElementById('modalInfo').innerHTML =
-        '<div class="info-row"><strong>Description:</strong> '+(t.description||'-')+'</div>' +
-        '<div class="info-row"><strong>Chain:</strong> '+(t.chain||'-')+'</div>' +
-        '<div class="info-row"><strong>Contract:</strong> '+(t.contract||'-')+'</div>' +
-        '<div class="info-row"><strong>Presale:</strong> '+(t.presale||'-')+'</div>';
+        `<div class="info-row"><strong>Description:</strong> ${t.description||'-'}</div>` +
+        `<div class="info-row"><strong>Chain:</strong> ${t.chain||'-'}</div>` +
+        `<div class="info-row"><strong>Contract:</strong> ${t.contract||'-'}</div>` +
+        `<div class="info-row"><strong>Presale:</strong> ${t.presale||'-'}</div>`;
       document.getElementById('detailModal').classList.add('open');
     }
   </script>
