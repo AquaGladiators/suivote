@@ -9,6 +9,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIO(server);
 
+// ✅ Let Express trust proxy headers (important for real IP detection)
+app.set('trust proxy', true);
+
 const DATA_FILE  = path.join(process.cwd(), 'tokens.json');
 const VOTES_FILE = path.join(process.cwd(), 'votes.json');
 
@@ -58,27 +61,34 @@ app.delete('/api/approved/:symbol', async (req, res) => {
   res.status(204).end();
 });
 
-// PUT to vote, limited by IP every 12h
+// ✅ PUT to vote, limited by IP every 12h (real IP fix)
 app.put('/api/approved/:symbol/vote', async (req, res) => {
-  const ip = req.ip || req.connection.remoteAddress;
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
   const symbol = req.params.symbol;
+
   const tokens   = await readJson(DATA_FILE, []);
   const votesMap = await readJson(VOTES_FILE, {});
+
   if (!votesMap[ip]) votesMap[ip] = {};
   const last = votesMap[ip][symbol] || 0;
   const now = Date.now();
   const TTL = 12 * 60 * 60 * 1000;
+
   if (now - last < TTL) {
-    const hoursLeft = Math.ceil((TTL - (now - last)) / (60*60*1000));
+    const hoursLeft = Math.ceil((TTL - (now - last)) / (60 * 60 * 1000));
     return res.status(429).json({ error: `Rate limit: wait ${hoursLeft}h before voting for ${symbol}` });
   }
+
   const idx = tokens.findIndex(t => t.symbol === symbol);
   if (idx === -1) return res.status(404).json({ error: 'Token not found' });
+
   tokens[idx].votes = (tokens[idx].votes || 0) + 1;
   votesMap[ip][symbol] = now;
+
   await writeJson(DATA_FILE, tokens);
   await writeJson(VOTES_FILE, votesMap);
-  // Broadcast update
+
+  // Broadcast vote update
   io.emit('voteUpdate', { symbol, votes: tokens[idx].votes });
   res.json({ symbol, votes: tokens[idx].votes });
 });
