@@ -218,17 +218,28 @@
     }
 
     function renderTrending() {
-      const list = approved.slice().sort((a,b)=>b.votes24h-a.votes24h).slice(0,10),
-            cont = document.getElementById('trendingList');
-      cont.innerHTML = '';
-      list.forEach(t => {
-        const span = document.createElement('span');
-        span.className = 'trending-item';
-        span.textContent = `${t.name} (${t.symbol}) ⋅ ${t.votes24h} new votes`;
-        span.onclick = () => showDetails(t);
-        cont.appendChild(span);
-      });
-    }
+  // sort by 24h votes, highest first, take top 10
+  const list = approved
+    .slice()
+    .sort((a, b) => (b.votes24h || 0) - (a.votes24h || 0))
+    .slice(0, 10);
+
+  const cont = document.getElementById('trendingList');
+  cont.innerHTML = '';
+
+  list.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'trending-item';
+
+    // default to zero if undefined
+    const newVotes = t.votes24h != null ? t.votes24h : 0;
+
+    span.textContent = `${t.name} (${t.symbol}) ⋅ ${newVotes} new votes`;
+    span.onclick = () => showDetails(t);
+    cont.appendChild(span);
+  });
+}
+
 
     function vote(sym) {
       if (voted.includes(sym)) return;
