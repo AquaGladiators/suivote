@@ -4,97 +4,107 @@ import http from 'http';
 import { Server as SocketIO } from 'socket.io';
 import fs from 'fs/promises';
 import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();                     // Load .env
+
+const ADMIN_USER = process.env.ADMIN_USER;
+const ADMIN_PASS = process.env.ADMIN_PASS;
 
 const app = express();
 const server = http.createServer(app);
 const io = new SocketIO(server);
 
-// ✅ Let Express trust proxy headers (important for real IP detection)
-app.set('trust proxy', true);
+app.set('trust proxy', true);        // Real IPs
+
+// Serve JSON bodies and static files from project root
+app.use(express.json({ limit: '50mb' }));
+app.use(express.static(process.cwd()));
 
 const DATA_FILE  = path.join(process.cwd(), 'tokens.json');
 const VOTES_FILE = path.join(process.cwd(), 'votes.json');
 
-// Allow large JSON bodies
-app.use(express.json({ limit: '50mb' }));
-app.use(express.static(process.cwd())); // Serve HTML, JSON
-
-// Helpers
-async function readJson(filePath, fallback) {
-  try { return JSON.parse(await fs.readFile(filePath, 'utf8')); }
+async function readJson(fp, fallback) {
+  try { return JSON.parse(await fs.readFile(fp, 'utf8')); }
   catch { return fallback; }
 }
-async function writeJson(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+async function writeJson(fp, data) {
+  await fs.writeFile(fp, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// WebSocket connection
-io.on('connection', socket => {
-  console.log('Client connected:', socket.id);
+// ————— Admin Login Endpoint —————
+app.post('/api/admin/login', (req, res) => {
+  const { user, pass } = req.body;
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ error: 'Unauthorized' });
 });
 
-// GET approved tokens
+// ————— Voting & Token APIs —————
+io.on('connection', sock => console.log('Client connected:', sock.id));
+
 app.get('/api/approved', async (_req, res) => {
-  const tokens = await readJson(DATA_FILE, []);
-  res.json(tokens);
+  res.json(await readJson(DATA_FILE, []));
 });
 
-// POST new token
 app.post('/api/approved', async (req, res) => {
-  const newToken = req.body;
-  if (!newToken || !newToken.name) return res.status(400).json({ error: 'Invalid payload' });
-  newToken.createdAt = Date.now();
-  const tokens = await readJson(DATA_FILE, []);
-  tokens.push(newToken);
-  await writeJson(DATA_FILE, tokens);
-  res.status(201).json(newToken);
+  const t = req.body;
+  if (!t?.name) return res.status(400).json({ error: 'Invalid payload' });
+  t.createdAt = Date.now();
+  const list = await readJson(DATA_FILE, []);
+  list.push(t);
+  await writeJson(DATA_FILE, list);
+  res.status(201).json(t);
 });
 
-// DELETE token by symbol
 app.delete('/api/approved/:symbol', async (req, res) => {
-  const symbol = req.params.symbol;
-  let tokens = await readJson(DATA_FILE, []);
-  const before = tokens.length;
-  tokens = tokens.filter(t => t.symbol !== symbol);
-  if (tokens.length === before) return res.status(404).json({ error: 'Token not found' });
-  await writeJson(DATA_FILE, tokens);
+  const sym = req.params.symbol;
+  let list = await readJson(DATA_FILE, []);
+  const before = list.length;
+  list = list.filter(t => t.symbol !== sym);
+  if (list.length === before) return res.status(404).json({ error: 'Not found' });
+  await writeJson(DATA_FILE, list);
   res.status(204).end();
 });
 
-// ✅ PUT to vote, limited by IP every 12h (real IP fix)
 app.put('/api/approved/:symbol/vote', async (req, res) => {
   const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-  const symbol = req.params.symbol;
+  const sym = req.params.symbol;
 
-  const tokens   = await readJson(DATA_FILE, []);
-  const votesMap = await readJson(VOTES_FILE, {});
+  const list = await readJson(DATA_FILE, []);
+  const votes = await readJson(VOTES_FILE, {});
 
-  if (!votesMap[ip]) votesMap[ip] = {};
-  const last = votesMap[ip][symbol] || 0;
-  const now = Date.now();
-  const TTL = 12 * 60 * 60 * 1000;
+  votes[ip] = votes[ip] || {};
+  const last = votes[ip][sym] || 0;
+  const now  = Date.now();
+  const TTL  = 12 * 60 * 60 * 1000;
 
   if (now - last < TTL) {
-    const hoursLeft = Math.ceil((TTL - (now - last)) / (60 * 60 * 1000));
-    return res.status(429).json({ error: `Rate limit: wait ${hoursLeft}h before voting for ${symbol}` });
+    const hrs = Math.ceil((TTL - (now - last)) / (60*60*1000));
+    return res.status(429).json({ error: `Wait ${hrs}h` });
   }
 
-  const idx = tokens.findIndex(t => t.symbol === symbol);
+  const idx = list.findIndex(t => t.symbol === sym);
   if (idx === -1) return res.status(404).json({ error: 'Token not found' });
 
-  tokens[idx].votes = (tokens[idx].votes || 0) + 1;
-  votesMap[ip][symbol] = now;
+  list[idx].votes = (list[idx].votes || 0) + 1;
+  votes[ip][sym] = now;
 
-  await writeJson(DATA_FILE, tokens);
-  await writeJson(VOTES_FILE, votesMap);
+  await writeJson(DATA_FILE, list);
+  await writeJson(VOTES_FILE, votes);
 
-  // Broadcast vote update
-  io.emit('voteUpdate', { symbol, votes: tokens[idx].votes });
-  res.json({ symbol, votes: tokens[idx].votes });
+  io.emit('voteUpdate', { symbol: sym, votes: list[idx].votes });
+  res.json({ symbol: sym, votes: list[idx].votes });
 });
 
 // Ensure votes.json exists
-(async () => { await readJson(VOTES_FILE, {}); })();
+(async()=>{ await readJson(VOTES_FILE, {}); })();
+
+// ————— Catch‑all to serve index.html —————
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(process.cwd(), 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
