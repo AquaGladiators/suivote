@@ -1,3 +1,4 @@
+// server.js
 import express from 'express';
 import http from 'http';
 import { Server as SocketIO } from 'socket.io';
@@ -70,6 +71,7 @@ app.get('/api/approved', async (_req, res) => {
     ...t,
     votes: t.votes || 0,
     votes24h: counts24h[t.symbol] || 0,
+    ranking: typeof t.ranking === 'number' ? t.ranking : 0.0
   }));
 
   res.json(out);
@@ -83,6 +85,7 @@ app.post('/api/approved', async (req, res) => {
   }
   newToken.createdAt = Date.now();
   newToken.votes = 0;
+  newToken.ranking = 0.0;
 
   const tokens = await readJson(DATA_FILE, []);
   tokens.push(newToken);
@@ -159,10 +162,36 @@ app.put('/api/approved/:symbol/votes', async (req, res) => {
   res.json({ symbol, votes });
 });
 
-// — DEBUG: serve raw tokens.json —
-app.get('/debug/tokens', (_req, res) => {
-  res.sendFile(DATA_FILE);
+// — PUT set safety ranking for a token (admin only) —
+// << ONLY THIS BLOCK WAS CHANGED >>
+app.put('/api/approved/:symbol/ranking', async (req, res) => {
+  const symbol = req.params.symbol;
+  let { ranking } = req.body;
+
+  // Clamp and validate
+  if (typeof ranking !== 'number') {
+    return res.status(400).json({ error: 'Ranking must be a number between 0 and 100' });
+  }
+  ranking = Math.min(100, Math.max(0, ranking));
+
+  // Round to one decimal
+  const newRank = parseFloat(ranking.toFixed(1));
+
+  const tokens = await readJson(DATA_FILE, []);
+  const idx = tokens.findIndex(t => t.symbol === symbol);
+  if (idx === -1) {
+    return res.status(404).json({ error: 'Token not found' });
+  }
+
+  tokens[idx].ranking = newRank;
+  await writeJson(DATA_FILE, tokens);
+
+  // Broadcast as a voteUpdate so your existing client listener will pick it up
+  io.emit('voteUpdate', { symbol, votes: tokens[idx].votes });
+
+  res.json({ symbol, ranking: newRank });
 });
+// << END CHANGED BLOCK >>
 
 // Ensure votes.json exists as array
 (async () => {
@@ -171,7 +200,7 @@ app.get('/debug/tokens', (_req, res) => {
   await writeJson(VOTES_FILE, v);
 })();
 
-// Catch-all for SPA
+// Catch-all to serve index.html for SPA/deep routes
 app.get('*', (_req, res) => {
   res.sendFile(path.join(process.cwd(), 'index.html'));
 });

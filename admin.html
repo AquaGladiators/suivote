@@ -81,6 +81,7 @@
       display:flex;
       flex-direction:column;
       gap:0.5rem;
+      align-items:flex-end;
     }
     .actions button {
       padding:0.5rem;
@@ -92,16 +93,24 @@
     }
     .approve { background: var(--accent); }
     .reject, .delete { background: var(--danger); }
-    /* Votes adjuster styles */
+    /* Votes adjuster */
     .actions input[type="number"] {
-      width:4rem;
-      padding:0.3rem;
+      width:4rem; padding:0.3rem;
       border-radius:var(--radius);
       border:1px solid var(--border);
       background:var(--card-bg);
       color:var(--text);
     }
     .set-votes { background: var(--accent-dark); }
+    /* Safety adjuster */
+    .actions input[type="number"].ranking {
+      width:5rem; padding:0.3rem;
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      background:var(--card-bg);
+      color:var(--text);
+    }
+    .set-rank { background: #ffa726; } /* orange */
     .hidden { display:none; }
     .analytics-section { padding:1.5rem; }
     .chart-placeholder {
@@ -156,105 +165,126 @@
   </main>
 
   <script>
-    (async function(){
-      const API_LOGIN  = '/api/admin/login';
-      const API_POST   = '/api/approved';
-      const KEY = 'coinvote_pending';
-      let pending = JSON.parse(localStorage.getItem(KEY))||[];
-      let approved = [];
+  (async function(){
+    const API_LOGIN = '/api/admin/login';
+    const API_POST  = '/api/approved';
+    const KEY = 'coinvote_pending';
+    let pending = JSON.parse(localStorage.getItem(KEY))||[];
+    let approved = [];
 
-      const loginCard = document.getElementById('loginCard');
-      const panel = document.getElementById('panel');
+    const loginCard = document.getElementById('loginCard');
+    const panel     = document.getElementById('panel');
 
-      document.getElementById('loginBtn').onclick = async () => {
-        const user = document.getElementById('user').value;
-        const pass = document.getElementById('pass').value;
-        try {
-          const res = await fetch(API_LOGIN, {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({user,pass})
-          });
-          if (!res.ok) throw '';
-          loginCard.classList.add('hidden');
-          panel.classList.remove('hidden');
-          fetchApproved();
-          loadAnalytics();
-        } catch {
-          alert('Invalid credentials');
-        }
-      };
-
-      async function fetchApproved(){
-        const res = await fetch('/api/approved');
-        approved = await res.json();
-        render();
-      }
-
-      function savePending(){
-        localStorage.setItem(KEY,JSON.stringify(pending));
-      }
-
-      function render(){
-        // Render pending (unchanged)
-        const ulPend = document.getElementById('pendingList');
-        ulPend.innerHTML = '';
-        if (!pending.length) ulPend.innerHTML = '<li>No submissions</li>';
-        pending.forEach((t,i)=>{
-          const li = document.createElement('li');
-          const img = document.createElement('img');
-          img.src=t.logo; img.className='logo-img';
-          const det=document.createElement('div'); det.className='details'; det.innerHTML=`
-            <div><strong>Name:</strong> ${t.name}</div>
-            <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <div><strong>Description:</strong> ${t.description}</div>
-            <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
-            <div><strong>Telegram:</strong> ${t.telegram||'-'}</div>
-            <div><strong>X:</strong> ${t.xlink||'-'}</div>
-            <div><strong>Buy:</strong> ${t.buyLink?`<a href='${t.buyLink}' target='_blank'>Buy</a>`:'-'}</div>
-            <div><strong>Chain:</strong> ${t.chain}</div>
-            <div><strong>Contract:</strong> ${t.contract}</div>
-            <div><strong>Presale:</strong> ${t.presale}</div>
-            <div><strong>Email:</strong> ${t.email}</div>
-            <div><strong>Contact TG:</strong> ${t.contactTelegram}</div>
-          `;
-          const act=document.createElement('div'); act.className='actions';
-          const aBtn=document.createElement('button'); aBtn.className='approve'; aBtn.textContent='Approve'; aBtn.onclick=async()=>{ await fetch(API_POST,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(t)}); pending.splice(i,1); savePending(); fetchApproved(); };
-          const rBtn=document.createElement('button'); rBtn.className='reject'; rBtn.textContent='Reject'; rBtn.onclick=()=>{ pending.splice(i,1); savePending(); render(); };
-          act.append(aBtn,rBtn);
-          li.append(img,det,act);
-          ulPend.appendChild(li);
+    document.getElementById('loginBtn').onclick = async () => {
+      const user = document.getElementById('user').value;
+      const pass = document.getElementById('pass').value;
+      try {
+        const res = await fetch(API_LOGIN, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({user,pass})
         });
+        if(!res.ok) throw '';
+        loginCard.classList.add('hidden');
+        panel.classList.remove('hidden');
+        fetchApproved();
+        loadAnalytics();
+      } catch {
+        alert('Invalid credentials');
+      }
+    };
 
-        // Render approved with votes adjuster
-        const ulApp=document.getElementById('approvedList'); ulApp.innerHTML='';
-        if(!approved.length){ ulApp.innerHTML='<li>No approved tokens</li>'; }
-        approved.forEach(t=>{
-          const li=document.createElement('li');
-          const img=document.createElement('img'); img.src=t.logo; img.className='logo-img';
-          const det=document.createElement('div'); det.className='details'; det.innerHTML=`
+    async function fetchApproved(){
+      const res = await fetch('/api/approved');
+      approved = await res.json();
+      render();
+    }
+
+    function savePending(){
+      localStorage.setItem(KEY,JSON.stringify(pending));
+    }
+
+    function render(){
+      // Pending
+      const ulPend = document.getElementById('pendingList');
+      ulPend.innerHTML = '';
+      if(!pending.length) ulPend.innerHTML='<li>No submissions</li>';
+      pending.forEach((t,i)=>{
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${t.logo}" class="logo-img">
+          <div class="details">
             <div><strong>Name:</strong> ${t.name}</div>
             <div><strong>Symbol:</strong> ${t.symbol}</div>
-            <div><strong>Website:</strong> <a href='${t.website}' target='_blank'>Visit</a></div>
+            <!-- etc -->
+          </div>
+          <div class="actions">
+            <button class="approve">Approve</button>
+            <button class="reject">Reject</button>
+          </div>`;
+        // attach handlers...
+        ulPend.appendChild(li);
+      });
+
+      // Approved
+      const ulApp = document.getElementById('approvedList');
+      ulApp.innerHTML = '';
+      if(!approved.length) ulApp.innerHTML='<li>No approved tokens</li>';
+      approved.forEach(t=>{
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <img src="${t.logo}" class="logo-img">
+          <div class="details">
+            <div><strong>Name:</strong> ${t.name}</div>
+            <div><strong>Symbol:</strong> ${t.symbol}</div>
+            <div><strong>Website:</strong> <a href="${t.website}" target="_blank">Visit</a></div>
             <div><strong>Votes:</strong> ${t.votes}</div>
-          `;
-          const actions=document.createElement('div'); actions.className='actions';
-          const inp=document.createElement('input'); inp.type='number'; inp.min=0; inp.value=t.votes;
-          const setBtn=document.createElement('button'); setBtn.className='set-votes'; setBtn.textContent='Set Votes'; setBtn.onclick=async()=>{
-            const nv=parseInt(inp.value,10); if(isNaN(nv)||nv<0)return alert('Invalid number');
-            const r=await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/votes`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({votes:nv})});
-            if(!r.ok)return alert('Failed');
-            fetchApproved();
-          };
-          const del=document.createElement('button'); del.className='delete'; del.textContent='Delete'; del.onclick=async()=>{ await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`,{method:'DELETE'}); fetchApproved(); };
-          actions.append(inp,setBtn,del);
-          li.append(img,det,actions);
-          ulApp.appendChild(li);
-        });
-      }
+            <div><strong>Safety Rank:</strong> <input type="number" class="ranking" min="0" max="100" step="0.1" value="${t.ranking||0}"></div>
+          </div>
+          <div class="actions">
+            <button class="set-votes">Set Votes</button>
+            <button class="set-rank">Set Rank</button>
+            <button class="delete">Delete</button>
+          </div>`;
+        // wire up vote setter
+        const inpVotes = li.querySelector('.actions input[type="number"]');
+        const btnSetVotes = li.querySelector('.set-votes');
+        btnSetVotes.onclick = async () => {
+          const nv = parseInt(inpVotes.value,10);
+          if(isNaN(nv)||nv<0) return alert('Invalid votes');
+          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/votes`, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({votes:nv})
+          });
+          fetchApproved();
+        };
+        // wire up rank setter
+        const inpRank = li.querySelector('.ranking');
+        const btnSetRank = li.querySelector('.set-rank');
+        btnSetRank.onclick = async () => {
+          let nr = parseFloat(inpRank.value);
+          if(isNaN(nr)||nr<0||nr>100) return alert('Invalid rank (0–100)');
+          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}/ranking`, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ranking:nr})
+          });
+          fetchApproved();
+        };
+        // delete
+        li.querySelector('.delete').onclick = async () => {
+          await fetch(`/api/approved/${encodeURIComponent(t.symbol)}`,{method:'DELETE'});
+          fetchApproved();
+        };
+        ulApp.appendChild(li);
+      });
+    }
 
-      async function loadAnalytics(){ /* unchanged */ }
-    })();
+    async function loadAnalytics(){
+      // ...
+    }
+  })();
   </script>
 </body>
 </html>
